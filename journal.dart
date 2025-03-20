@@ -1,7 +1,11 @@
+/*PLEASE READ!
+During testing in isolation this file is being tested as main.dart. If any issues come up that is why. This will be changed later.
+*/
 import 'package:flutter/material.dart';
 //add function to make new journal entries
-void add(){
+ add(){
 print('ADD'); //button testing
+//print(date.text);
 }
 //delete function to delete journal entries
 void delete(){
@@ -30,24 +34,46 @@ class _UIState extends State<Main> {
   get children => null;
 
   //returns widgets
+  late String date;
+  final myController= TextEditingController();//for input
+  @override
+  //Widget build(BuildContext context)
+  //{return TextField(controller: myController);}
   @override
   Widget build(BuildContext context){
     //var text = Text('Journal');
+    
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
           title: Text('Journal'),
           ),  
-          body: 
-          //children: [ 
-          const Align( //Menu options
-          alignment: Alignment.topLeft,
+           
+          body:
+          //@override
+          Row( children: <Widget> [ 
+
+           Align( //Menu options
+          alignment: Alignment.centerLeft,
+          
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               ElevatedButton(
-                onPressed: add,
+                onPressed: () { 
+                date=myController.text.trim();
+                add();
+                 },
+                //controller: myController,
                 child: Text('ADD'),
+                //context: context,
+                //builder: (context)
+                //const SizedBox(height: 5),
+                //return AlertDialog (
+                //  TextEditingController.content: 
+                //  Text(myController.text),);
               ),
+              // SizedBox(height: 20),
               ElevatedButton(
                 onPressed: delete,
                 child: Text('DELETE'),
@@ -60,18 +86,62 @@ class _UIState extends State<Main> {
                 onPressed: view,
                 child: Text('VIEW'),
               ),
+       
             ],
           ),    
+
+            ),
+            Align(
+                alignment: Alignment.centerRight,
+            child: Column(
+              //mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('Date'),
+                   SizedBox(
+                    height: 30,
+                    width: 200,
+                    child: TextField(
+                    controller: myController,
+                      decoration: InputDecoration(border: OutlineInputBorder(),
+                      hintText: 'Input',
+                      contentPadding: EdgeInsets.symmetric(horizontal: 10.0),
+                    ),
+                    ),
+                  ),
+                  Text('Name'),
+                   SizedBox(
+                    height: 30,
+                    width: 200,
+                    child: TextField(
+                    
+                      decoration: InputDecoration(border: OutlineInputBorder(),
+                      hintText: 'Input',
+                      contentPadding: EdgeInsets.symmetric(horizontal: 10.0),
+                    ),
+                    ),
+                  ),
+                  //entry
+                   SizedBox(
+                    height: 400,
+                    width: 300,
+                    child: TextField(
+                      decoration: InputDecoration(border: OutlineInputBorder(),
+                      hintText: 'Input',
+                      contentPadding: EdgeInsets.symmetric(horizontal: 10.0),
+                    ),
+                    ),
+                  ),
+                ]
+          ),
+            ),
+          ]//main children
         ),
-  //Journal entry
-        //TextField(
-          //decoration: const InputDecoration(
-        //  border: UnderlineInputBorder(),
-      //    labelText: 'Share whatever you like',
-    //        ),
-          //],
-        ),
-      ),     
-    );    
+    
+          
+      ),
+      );
+ //To clean up controller
+ //date.dispose();
+ //super.dispose();     
   }
 }
