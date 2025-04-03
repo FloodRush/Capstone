@@ -1,3 +1,4 @@
+// this is the homepage
 import 'package:firstly/pages/journal.dart';
 import 'package:flutter/material.dart';
 
@@ -8,16 +9,20 @@ class Homepage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.green,
+      appBar: AppBar(
+        backgroundColor: Colors.green,
+        centerTitle: true,
+        title: const Text(
+          'Welcome to FreshStart',
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        ),
+      ), //appbar color
+      backgroundColor: Colors.grey[300], // rest of the screen bg color
       body: SafeArea(
         child: Center(
           child: Column(
             children: [
               const SizedBox(height: 50),
-              const Text(
-                'Welcome to FreshStart',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
               ElevatedButton(
                 onPressed: () {
                   Navigator.push(

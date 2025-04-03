@@ -1,3 +1,5 @@
+// this is the login/ account creation homepage
+import 'package:firstly/pages/log.dart';
 import 'package:firstly/pages/temp_page.dart';
 import 'package:flutter/material.dart';
 
@@ -23,7 +25,12 @@ class LoginPage extends StatelessWidget {
               // Login Button (for now, it does nothing)
               ElevatedButton(
                 onPressed: () {
-                  // adding log in page later
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const MyLoginPage(title: 'Log In'),
+                    ),
+                  );
                 },
                 child: const Text('Login'),
               ),
@@ -43,6 +50,7 @@ class LoginPage extends StatelessWidget {
                 },
                 child: const Text('Create Account'),
               ),
+              const SizedBox(height: 10),
               ElevatedButton(
                 onPressed: () {
                   Navigator.push(
@@ -54,8 +62,10 @@ class LoginPage extends StatelessWidget {
                     ),
                   );
                 },
+
                 child: const Text('Homepage'),
               ),
+              const SizedBox(height: 10),
             ],
           ),
         ),
@@ -101,9 +111,13 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.green,
-        title: Text(widget.title),
+        title: Text(
+          widget.title,
+          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        ),
         centerTitle: true,
       ),
+      backgroundColor: Colors.grey[300], // rest of the screen bg color
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
