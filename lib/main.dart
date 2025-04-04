@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'pages/test.dart';
-import 'pages/temp_page.dart';
-import 'pages/journal.dart';
+//import 'pages/temp_page.dart';
+import 'pages/main_navigation.dart';
+import 'package:project/theme.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -16,9 +17,10 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'FreshStart', //this is how the app will appear in task manager
       theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
+         fontFamily: 'Poppins',
+        primaryColor: AppColors.hotPink,
       ),
-      home: LoginPage(),
+      home: MainNavigation(),
     );
   }
 }
