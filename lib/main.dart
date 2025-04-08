@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'pages/main_navigation.dart';
 import 'package:project/theme.dart';
+import 'pages/startUp_page.dart';
 
 void main() {
   runApp(MyApp());
@@ -18,7 +19,7 @@ class MyApp extends StatelessWidget {
         fontFamily: 'Poppins',
         primaryColor: AppColors.hotPink,
       ),
-      home: MainNavigation(),
+      home: LoginPage(),
     );
   }
 }
