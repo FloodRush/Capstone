@@ -1,26 +1,28 @@
 import 'package:flutter/material.dart';
 import '../theme.dart';
 
-class MyLoginPage extends StatefulWidget {
+class MyCreateAccount extends StatefulWidget {
   //create account widget
-  const MyLoginPage({super.key, required this.title});
+  const MyCreateAccount({super.key, required this.title});
 
   final String title;
 
   @override
-  State<MyLoginPage> createState() => _MyLoginPageState();
+  State<MyCreateAccount> createState() => _MyCreateAccount();
 }
 
-class _MyLoginPageState extends State<MyLoginPage> {
+class _MyCreateAccount extends State<MyCreateAccount> {
   final _formKey = GlobalKey<FormState>();
+  final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _birthdayController = TextEditingController();
 
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Successfully Logged In!'),
+          content: Text('Account Created Successfully!'),
         ), // message if all paramaters are met
       );
 
@@ -54,6 +56,34 @@ class _MyLoginPageState extends State<MyLoginPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Name Field
+              TextFormField(
+                controller: _nameController,
+                decoration: const InputDecoration(
+                  labelText: 'Name',
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) =>
+                    value!.isEmpty ? 'Please enter your name' : null,
+              ),
+              const SizedBox(height: 12),
+
+              // DOB Field
+              TextFormField(
+                controller: _birthdayController,
+                decoration: const InputDecoration(
+                  labelText: 'DOB',
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(),
+                ),
+                validator: (value) =>
+                    value!.isEmpty ? 'Please enter your DOB' : null,
+              ),
+              const SizedBox(height: 12),
+
               // Email Field
               TextFormField(
                 controller: _emailController,
@@ -105,7 +135,7 @@ class _MyLoginPageState extends State<MyLoginPage> {
                         AppColors.hotPink, // Set the button color here
                     foregroundColor: Colors.white, // Set the text color here
                   ),
-                  child: const Text('Log in'),
+                  child: const Text('Create Account'),
                 ),
               ),
             ],
