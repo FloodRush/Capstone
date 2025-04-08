@@ -1,7 +1,5 @@
-// this is the login/ account creation homepage
-//import 'package:firstly/pages/log.dart';
-//import 'package:firstly/pages/temp_page.dart';
 import 'package:flutter/material.dart';
+import '../theme.dart';
 import 'main_navigation.dart';
 import 'log_in_page.dart';
 
@@ -11,60 +9,66 @@ class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.green,
-      body: SafeArea(
-        child: Center(
-          child: Column(
-            children: [
-              const SizedBox(height: 50),
-              const Icon(Icons.lock, size: 100),
-              const Text(
-                'Welcome to FreshStart',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 40),
-              const Spacer(), // pushing the login and create account buttons down
-              // Login Button (for now, it does nothing)
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const MyLoginPage(title: 'Log In'),
-                    ),
-                  );
-                },
-                child: const Text('Login'),
-              ),
-              const SizedBox(height: 10),
-
-              // Create Account Button (Navigates to MyHomePage)
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          const MyCreateAccount(title: 'Create Account'),
-                    ),
-                  );
-                },
-                child: const Text('Create Account'),
-              ),
-              const SizedBox(height: 10),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const MainNavigation(),
-                    ),
-                  );
-                },
-                child: const Text('Homepage'),
-              ),
-              const SizedBox(height: 10),
-            ],
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: appGradientBackground(),
+        ),
+        child: SafeArea(
+          child: Center(
+            child: Column(
+              children: [
+                const SizedBox(height: 50),
+                const Icon(Icons.lock, size: 100, color: Colors.white),
+                const Text(
+                  'Welcome to FreshStart',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 40),
+                const Spacer(),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            const MyLoginPage(title: 'Log In'),
+                      ),
+                    );
+                  },
+                  child: const Text('Login'),
+                ),
+                const SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            const MyCreateAccount(title: 'Create Account'),
+                      ),
+                    );
+                  },
+                  child: const Text('Create Account'),
+                ),
+                const SizedBox(height: 10),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const MainNavigation(),
+                      ),
+                    );
+                  },
+                  child: const Text('Homepage'),
+                ),
+                const SizedBox(height: 10),
+              ],
+            ),
           ),
         ),
       ),
