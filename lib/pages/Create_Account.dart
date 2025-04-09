@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme.dart';
+import '../services/auth_service.dart';
 
 class MyCreateAccount extends StatefulWidget {
   //create account widget
@@ -13,10 +14,10 @@ class MyCreateAccount extends StatefulWidget {
 
 class _MyCreateAccount extends State<MyCreateAccount> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _nameController = TextEditingController();
+  //final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _birthdayController = TextEditingController();
+  //final TextEditingController _birthdayController = TextEditingController();
 
   void _submitForm() {
     if (_formKey.currentState!.validate()) {
@@ -57,7 +58,7 @@ class _MyCreateAccount extends State<MyCreateAccount> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Name Field
-              TextFormField(
+              /* TextFormField(
                 controller: _nameController,
                 decoration: const InputDecoration(
                   labelText: 'Name',
@@ -82,7 +83,7 @@ class _MyCreateAccount extends State<MyCreateAccount> {
                 validator: (value) =>
                     value!.isEmpty ? 'Please enter your DOB' : null,
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 12),*/
 
               // Email Field
               TextFormField(
@@ -129,7 +130,12 @@ class _MyCreateAccount extends State<MyCreateAccount> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: _submitForm,
+                  onPressed: () async {
+                    await AuthService().signup(
+                        email: _emailController.text,
+                        password: _passwordController.text,
+                        context: context);
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor:
                         AppColors.hotPink, // Set the button color here
