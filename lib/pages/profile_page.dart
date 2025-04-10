@@ -13,7 +13,26 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   final currentUser = FirebaseAuth.instance.currentUser!;
 
-  Future<void> editField(String field) async {}
+  Future<void> editField(String field) async {
+    String newValue = "";
+    await showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+              backgroundColor: Colors.grey[900],
+              title: Text(
+                "Edit $field",
+                style: const TextStyle(color: Colors.white),
+              ),
+              content: TextField(
+                autofocus: true,
+                style: const TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  hintText: "Enter new $field",
+                  hintStyle: TextStyle(color: Colors.grey),
+                ),
+              ),
+            ));
+  }
 
   @override
   Widget build(BuildContext context) {
