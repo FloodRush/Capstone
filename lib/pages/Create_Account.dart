@@ -1,10 +1,12 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../theme.dart';
 import '../services/auth_service.dart';
+import 'main_navigation.dart';
 
 class MyCreateAccount extends StatefulWidget {
-  //create account widget
+  // Create account widget
   const MyCreateAccount({super.key, required this.title});
 
   final String title;
@@ -33,7 +35,7 @@ class _MyCreateAccount extends State<MyCreateAccount> {
         ),
         centerTitle: true,
       ),
-      backgroundColor: Colors.grey[300], // rest of the screen bg color
+      backgroundColor: Colors.grey[300], // Rest of the screen bg color
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
@@ -86,10 +88,38 @@ class _MyCreateAccount extends State<MyCreateAccount> {
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: () async {
-                    await AuthService().signup(
-                        email: _emailController.text,
-                        password: _passwordController.text,
-                        context: context);
+                    if (_formKey.currentState!.validate()) {
+                      try {
+                        // Sign up the user using Firebase Authentication
+                        UserCredential userCredential = await FirebaseAuth
+                            .instance
+                            .createUserWithEmailAndPassword(
+                          email: _emailController.text,
+                          password: _passwordController.text,
+                        );
+
+                        // Store the email in Firestore
+                        await FirebaseFirestore.instance
+                            .collection("Users")
+                            .doc(userCredential.user!.email)
+                            .set({
+                          'email': userCredential.user!.email,
+                          'username': _emailController.text
+                              .split('@')[0], // Use part of email as username
+                          'bio': "empty bio...", // Default bio
+                        });
+
+                        // Navigate to the homepage after successful signup
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const MainNavigation()),
+                        );
+                      } on FirebaseAuthException catch (e) {
+                        // Handle errors
+                        print("Error during sign up: ${e.message}");
+                      }
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor:
