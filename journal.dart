@@ -18,43 +18,65 @@ class Main extends StatefulWidget {
 class _UIState extends State<Main> {
   final List<String> entry = [];
   final List<String> name = [];
+  final List<String> date = [];
   final formkey = GlobalKey<FormState>();
-  final myController = TextEditingController();
+  final dateController = TextEditingController();
+  final nameController = TextEditingController();
+  final entryController = TextEditingController();
   DateTime startDate = DateTime(2025, 5, 7);
 
   void add() {
-    setState(() {
-entry.add(myController.text.trim());
-    });
-  }
+  setState(() {
+    date.add(dateController.text.trim());
+    name.add(nameController.text.trim());
+    entry.add(entryController.text.trim());
+  });
+}
 
-  delete(name) {
+  delete(deleted) {
+    int i = name.indexOf(deleted.trim());
     setState(() {
-      if (entry.isNotEmpty) {
-        entry.remove(name);
+      if (entry.isNotEmpty && i != -1) {
+        name.removeAt(i);
+        date.removeAt(i);
+        entry.removeAt(i);
       }
+       else if(entry.isEmpty){
+    print('Entry does not exist');
+   }
     });}
 
-   update(name) {
+   update(updated) {
     setState(() {
-      if (entry.isNotEmpty) {
-        ///date.insert(0, myController.text.trim());
-        name.insert(0, myController.text.trim());
-        entry.insert(0, myController.text.trim());
+      int i=name.indexOf(updated.trim());
+      if (entry.isNotEmpty && i != -1) {
+        date[i] = dateController.text.trim();
+        name[i] = nameController.text.trim();
+        entry[i] = entryController.text.trim();
       }
+       else if(entry.isEmpty){
+    print('Entry does not exist');
+   }
     });
   }
 //view function to view journal entries
-   view(name) {
-   if (entry.isNotEmpty) {
+   view(viewed) {
+    int i = name.indexOf(viewed.trim());
+   if (entry.isNotEmpty && i != -1) {
    // SizedBox(
     //  height: 100,
      // width: 30,
      // child: Text(entry),
     //);
-    print(entry);
-  }
+    //for testing
+    print(date[i]);
+    print(name[i]);
+    print(entry[i]);
    }
+   else if(entry.isEmpty){
+    print('Entry does not exist');
+   }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -63,6 +85,7 @@ entry.add(myController.text.trim());
         title: Text("Journal"),
         centerTitle: true,
       ),
+
       backgroundColor: Colors.pink[200],
       body: 
       Row( 
@@ -73,9 +96,9 @@ entry.add(myController.text.trim());
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 ElevatedButton(onPressed: add, child: Text('ADD')),
-                ElevatedButton(onPressed: () => delete(name), child: Text('DELETE')),
-                ElevatedButton(onPressed: () => update(name), child: Text('UPDATE')),
-                ElevatedButton(onPressed: () => view(name), child: Text('VIEW')),
+                ElevatedButton(onPressed: () => delete(nameController.text), child: Text('DELETE')),
+                ElevatedButton(onPressed: () => update(nameController.text), child: Text('UPDATE')),
+                ElevatedButton(onPressed: () => view(nameController.text), child: Text('VIEW')),
               ],
             ),
           ),
@@ -89,7 +112,7 @@ entry.add(myController.text.trim());
                     height: 30,
                     width: 200,
                     child: TextField(
-                      controller: myController,
+                      controller: dateController,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
                         hintText: 'Input',
@@ -121,10 +144,10 @@ entry.add(myController.text.trim());
                     height: 30,
                     width: 200,
                     child: TextField(
-                      controller: myController,
+                      controller: nameController,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
-                        hintText: 'Input',
+                        hintText: 'Name',
                         contentPadding: EdgeInsets.symmetric(horizontal: 10.0),
                       ),
                     ),
@@ -142,7 +165,7 @@ entry.add(myController.text.trim());
                     height: 100,
                     width: 200,
                     child: TextField(
-                      controller: myController,
+                      controller: entryController,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
                         hintText: 'How are you feeling?',
