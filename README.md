@@ -1,10 +1,10 @@
-# project
+# FreshStart App
 
-A new Flutter project.
+A new Flutter project as a capstone project aimed to help young adults improve their mental health.
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+The current production build of this app is in the compiled branch. to run it you simply need to pull from it and then do flutter clean, flutter pub get, and the code should run on a andrioid simulator.
 
 A few resources to get you started if this is your first Flutter project:
 
