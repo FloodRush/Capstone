@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'pages/main_navigation.dart';
 import 'package:project/theme.dart';
 import 'pages/startUp_page.dart';
+import 'package:table_calendar/table_calendar.dart';
+import 'pages/mood_tracker_page.dart';
+
 
 void main() {
   runApp(MyApp());
