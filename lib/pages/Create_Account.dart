@@ -1,8 +1,12 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../theme.dart';
+import '../services/auth_service.dart';
+import 'main_navigation.dart';
 
 class MyCreateAccount extends StatefulWidget {
-  //create account widget
+  // Create account widget
   const MyCreateAccount({super.key, required this.title});
 
   final String title;
@@ -13,25 +17,8 @@ class MyCreateAccount extends StatefulWidget {
 
 class _MyCreateAccount extends State<MyCreateAccount> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _birthdayController = TextEditingController();
-
-  void _submitForm() {
-    if (_formKey.currentState!.validate()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Account Created Successfully!'),
-        ), // message if all paramaters are met
-      );
-
-      // Navigate back to Login Page after success
-      Future.delayed(const Duration(seconds: 2), () {
-        Navigator.pop(context);
-      });
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,7 +35,7 @@ class _MyCreateAccount extends State<MyCreateAccount> {
         ),
         centerTitle: true,
       ),
-      backgroundColor: Colors.grey[300], // rest of the screen bg color
+      backgroundColor: Colors.grey[300], // Rest of the screen bg color
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Form(
@@ -56,34 +43,6 @@ class _MyCreateAccount extends State<MyCreateAccount> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Name Field
-              TextFormField(
-                controller: _nameController,
-                decoration: const InputDecoration(
-                  labelText: 'Name',
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) =>
-                    value!.isEmpty ? 'Please enter your name' : null,
-              ),
-              const SizedBox(height: 12),
-
-              // DOB Field
-              TextFormField(
-                controller: _birthdayController,
-                decoration: const InputDecoration(
-                  labelText: 'DOB',
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(),
-                ),
-                validator: (value) =>
-                    value!.isEmpty ? 'Please enter your DOB' : null,
-              ),
-              const SizedBox(height: 12),
-
               // Email Field
               TextFormField(
                 controller: _emailController,
@@ -124,12 +83,44 @@ class _MyCreateAccount extends State<MyCreateAccount> {
                 },
               ),
               const SizedBox(height: 20),
-              // const Spacer(), push the create account button to the bottom, javent decided if i like it or not
               // Submit Button
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: _submitForm,
+                  onPressed: () async {
+                    if (_formKey.currentState!.validate()) {
+                      try {
+                        // Sign up the user using Firebase Authentication
+                        UserCredential userCredential = await FirebaseAuth
+                            .instance
+                            .createUserWithEmailAndPassword(
+                          email: _emailController.text,
+                          password: _passwordController.text,
+                        );
+
+                        // Store the email in Firestore
+                        await FirebaseFirestore.instance
+                            .collection("Users")
+                            .doc(userCredential.user!.email)
+                            .set({
+                          'email': userCredential.user!.email,
+                          'username': _emailController.text
+                              .split('@')[0], // Use part of email as username
+                          'bio': "empty bio...", // Default bio
+                        });
+
+                        // Navigate to the homepage after successful signup
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const MainNavigation()),
+                        );
+                      } on FirebaseAuthException catch (e) {
+                        // Handle errors
+                        print("Error during sign up: ${e.message}");
+                      }
+                    }
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor:
                         AppColors.hotPink, // Set the button color here

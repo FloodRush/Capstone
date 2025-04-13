@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../theme.dart';
+import '../services/auth_service.dart';
 
 class MyLoginPage extends StatefulWidget {
   //create account widget
@@ -15,21 +16,6 @@ class _MyLoginPageState extends State<MyLoginPage> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-
-  void _submitForm() {
-    if (_formKey.currentState!.validate()) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Successfully Logged In!'),
-        ), // message if all paramaters are met
-      );
-
-      // Navigate back to Login Page after success
-      Future.delayed(const Duration(seconds: 2), () {
-        Navigator.pop(context);
-      });
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -99,7 +85,12 @@ class _MyLoginPageState extends State<MyLoginPage> {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: _submitForm,
+                  onPressed: () async {
+                    await AuthService().signin(
+                        email: _emailController.text,
+                        password: _passwordController.text,
+                        context: context);
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor:
                         AppColors.hotPink, // Set the button color here
