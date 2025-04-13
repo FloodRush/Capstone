@@ -3,7 +3,7 @@ import 'package:project/theme.dart';
 import 'home_page.dart';
 import 'journal_page.dart';
 import 'meditation_page.dart';
-import 'goal_page.dart';
+import 'goal_tracking_page.dart';
 import 'motivation_page.dart';
 
 class MainNavigation extends StatefulWidget {
@@ -19,7 +19,7 @@ class _MainNavigationState extends State<MainNavigation> {
   final pages = [
     HomePage(),
     JournalPage(),
-    GoalPage(),
+    MyGoalPage(),
     MotivationPage(),
     MeditationPage(),
   ];

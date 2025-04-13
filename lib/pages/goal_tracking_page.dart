@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:project/theme.dart';
 
 class MyGoalPage extends StatefulWidget {
   @override
@@ -29,7 +30,9 @@ class _MyGoalPageState extends State<MyGoalPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Daily Goals'),
+        title: Text('Daily Goals'),
+        centerTitle: true,
+        backgroundColor: AppColors.lightPink,
       ),
       body: Container(
         padding: const EdgeInsets.all(20.0),
@@ -55,7 +58,8 @@ class _MyGoalPageState extends State<MyGoalPage> {
                     title: Text(
                       item['label'],
                       style: TextStyle(
-                        decoration: item['done'] ? TextDecoration.lineThrough : null,
+                        decoration:
+                            item['done'] ? TextDecoration.lineThrough : null,
                       ),
                     ),
                     trailing: Checkbox(
