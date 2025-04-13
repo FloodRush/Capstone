@@ -56,15 +56,13 @@ class _MeditationPageState extends State<MeditationPage> {
       for (int i = 5; i > 0; i--) {
         await Future.delayed(Duration(seconds: 1));
         setState(() {
-          countdownText = "Inhale
-$i";
+          countdownText = "Inhale $i";
         });
       }
       for (int i = 3; i > 0; i--) {
         await Future.delayed(Duration(seconds: 1));
         setState(() {
-          countdownText = "Exhale
-$i";
+          countdownText = "Exhale $i";
         });
       }
     });
