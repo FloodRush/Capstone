@@ -75,6 +75,10 @@ flutter:
     - assets/audio/breath_5.mp3
     - assets/audio/breath_10.mp3
     - assets/audio/breath_15.mp3
+    - assets/card/motivation.png
+    - assets/card/journal.PNG
+    - assets/card/goals.png
+    - assets/card/meditation.png
 
   # To add assets to your application, add an assets section, like this:
   # assets:
@@ -99,7 +103,7 @@ flutter:
   #       - asset: fonts/Schyler-Italic.ttf
   #         style: italic
   #   - family: Trajan Pro
-  #     fonts:
+  #     fonts: 
   #       - asset: fonts/TrajanPro.ttf
   #       - asset: fonts/TrajanPro_Bold.ttf
   #         weight: 700
