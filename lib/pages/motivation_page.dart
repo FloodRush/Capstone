@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:share_plus/share_plus.dart';
+import 'favorites_page.dart';
 
 class MotivationPage extends StatefulWidget {
   const MotivationPage({super.key});
@@ -14,6 +15,7 @@ class _MotivationPageState extends State<MotivationPage> {
   final String apiKey = '2e6911b429771b543d931408ced6f86c';
   final List<Map<String, String>> quotes = [];
   final Set<int> favorites = {};
+  final List<Map<String, String>> favoriteQuotes = [];
   int currentIndex = 0;
   bool loading = false;
 
@@ -67,8 +69,11 @@ class _MotivationPageState extends State<MotivationPage> {
     setState(() {
       if (favorites.contains(currentIndex)) {
         favorites.remove(currentIndex);
+        favoriteQuotes
+            .removeWhere((q) => q["text"] == quotes[currentIndex]["text"]);
       } else {
         favorites.add(currentIndex);
+        favoriteQuotes.add(quotes[currentIndex]);
       }
     });
   }
@@ -80,60 +85,115 @@ class _MotivationPageState extends State<MotivationPage> {
 
   @override
   Widget build(BuildContext context) {
-    if (quotes.isEmpty || loading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
-    }
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("Daily Motivation"),
+        centerTitle: true,
+        elevation: 0,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.bookmark),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => FavoritesPage(
+                    favorites: favoriteQuotes,
+                    onRemoveFavorite: (index) {
+                      setState(() {
+                        final removedQuote = favoriteQuotes[index];
+                        favoriteQuotes.removeAt(index);
+                        favorites.removeWhere(
+                            (i) => quotes[i]["text"] == removedQuote["text"]);
+                      });
+                    },
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
+      ),
+      body: Stack(
+        children: [
+          if (quotes.isNotEmpty) _buildQuoteContent(),
+          if (loading)
+            Container(
+              color: Colors.black26,
+              child: const Center(child: CircularProgressIndicator()),
+            ),
+        ],
+      ),
+    );
+  }
 
+  Widget _buildQuoteContent() {
     final quote = quotes[currentIndex];
     final isFavorite = favorites.contains(currentIndex);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Motivational Quote"),
-        centerTitle: true,
-      ),
-      body: Padding(
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 500),
+      child: Padding(
         padding: const EdgeInsets.all(24.0),
+        key: ValueKey(currentIndex),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text(
-              '"${quote["text"]}"',
-              style: const TextStyle(fontSize: 20),
-              textAlign: TextAlign.center,
+            Card(
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(24.0),
+                child: Column(
+                  children: [
+                    Text(
+                      '"${quote["text"]}"',
+                      style:
+                          Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                height: 1.4,
+                                letterSpacing: 0.5,
+                              ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 24),
+                    Text(
+                      "- ${quote["author"]}",
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            fontStyle: FontStyle.italic,
+                            color: Colors.grey[700],
+                          ),
+                    ),
+                  ],
+                ),
+              ),
             ),
-            const SizedBox(height: 16),
-            Text(
-              "- ${quote["author"]}",
-              style: const TextStyle(fontSize: 16, fontStyle: FontStyle.italic),
-            ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 48),
             Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 IconButton(
-                  icon: const Icon(Icons.arrow_back),
-                  onPressed: previousQuote,
+                  icon: const Icon(Icons.arrow_back_ios),
+                  onPressed: currentIndex > 0 ? previousQuote : null,
+                  color: Theme.of(context).primaryColor,
                 ),
-                const SizedBox(width: 16),
                 IconButton(
                   icon: Icon(
-                    Icons.favorite,
-                    color: isFavorite ? Colors.pink : Colors.grey,
+                    isFavorite ? Icons.favorite : Icons.favorite_border,
+                    color: isFavorite ? Colors.pink : Colors.grey[600],
                   ),
                   onPressed: toggleFavorite,
                 ),
-                const SizedBox(width: 16),
                 IconButton(
-                  icon: const Icon(Icons.share),
+                  icon: const Icon(Icons.share_rounded),
                   onPressed: shareQuote,
+                  color: Theme.of(context).primaryColor,
                 ),
-                const SizedBox(width: 16),
                 IconButton(
-                  icon: const Icon(Icons.arrow_forward),
+                  icon: const Icon(Icons.arrow_forward_ios),
                   onPressed: nextQuote,
+                  color: Theme.of(context).primaryColor,
                 ),
               ],
             ),
