@@ -68,14 +68,17 @@ flutter:
   # the material Icons class.
   uses-material-design: true
   assets:
+    # Animations
     - assets/animation/session_5.json
     - assets/animation/session_10.json
     - assets/animation/session_15.json
     - assets/animation/session_60.json
-    - assets/audio/breath_60.mp3
+    # Meditation Audio
     - assets/audio/breath_5.mp3
     - assets/audio/breath_10.mp3
     - assets/audio/breath_15.mp3
+    - assets/audio/breath_60.mp3
+    # Cards
     - assets/card/motivation.png
     - assets/card/journal.PNG
     - assets/card/goals.png
