@@ -6,6 +6,8 @@ import 'package:project/theme.dart';
 import 'pages/startUp_page.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'pages/mood_tracker_page.dart';
+import 'package:provider/provider.dart';
+import 'providers/theme_provider.dart';
 
 
 Future<void> main() async {
@@ -13,7 +15,12 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(MyApp());
+  runApp(
+    ChangeNotifierProvider(
+      create: (context) => ThemeProvider(),
+      child: MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
@@ -21,14 +28,15 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Mental Health App',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        fontFamily: 'Poppins',
-        primaryColor: AppColors.hotPink,
-      ),
-      home: LoginPage(),
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, child) {
+        return MaterialApp(
+          title: 'Mental Health App',
+          debugShowCheckedModeBanner: false,
+          theme: themeProvider.isDarkMode ? AppThemes.darkTheme : AppThemes.lightTheme,
+          home: LoginPage(),
+        );
+      },
     );
   }
 }

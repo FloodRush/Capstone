@@ -7,6 +7,8 @@ import 'goal_page.dart';
 import 'motivation_page.dart';
 import 'mood_tracker_page.dart';
 import 'profile_page.dart';
+import 'package:provider/provider.dart';
+import '../providers/theme_provider.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -47,21 +49,15 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Color.fromARGB(255, 231, 125, 160),
-              AppColors.hotPink,
-              Color.fromARGB(255, 247, 199, 215),
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-        ),
-        child: SafeArea(
-          child: Column(
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, child) {
+        return Scaffold(
+          body: Container(
+            decoration: BoxDecoration(
+              gradient: appGradientBackground(isDark: themeProvider.isDarkMode),
+            ),
+            child: SafeArea(
+              child: Column(
             children: [
               Padding(
                 padding:
@@ -73,9 +69,14 @@ class HomePage extends StatelessWidget {
                           Navigator.push(context, createRoute(ProfilePage())),
                       child: CircleAvatar(
                         radius: 26,
-                        backgroundColor: Colors.white,
+                        backgroundColor: themeProvider.isDarkMode 
+                            ? AppColors.accentPurple.withOpacity(0.3)
+                            : Colors.white,
                         child: Icon(Icons.person,
-                            color: AppColors.hotPink, size: 32),
+                            color: themeProvider.isDarkMode 
+                                ? AppColors.darkText
+                                : AppColors.hotPink, 
+                            size: 32),
                       ),
                     ),
                     SizedBox(width: 14),
@@ -85,16 +86,45 @@ class HomePage extends StatelessWidget {
                         children: [
                           Text("Welcome Back!",
                               style: TextStyle(
-                                  color: Colors.white70, fontSize: 16)),
+                                  color: themeProvider.isDarkMode 
+                                      ? AppColors.darkSecondaryText
+                                      : Colors.white70, 
+                                  fontSize: 16)),
                           Text("How are you today?",
                               style: TextStyle(
-                                  color: Colors.white,
+                                  color: themeProvider.isDarkMode 
+                                      ? AppColors.darkText
+                                      : Colors.white,
                                   fontSize: 22,
                                   fontWeight: FontWeight.bold)),
                         ],
                       ),
                     ),
-                    Icon(Icons.settings, color: Colors.white),
+                    Consumer<ThemeProvider>(
+                      builder: (context, themeProvider, child) {
+                        return GestureDetector(
+                          onTap: () => themeProvider.toggleTheme(),
+                          child: Container(
+                            padding: EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: themeProvider.isDarkMode 
+                                  ? Colors.black.withOpacity(0.3)
+                                  : Colors.white.withOpacity(0.2),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Icon(
+                              themeProvider.isDarkMode 
+                                  ? Icons.light_mode 
+                                  : Icons.dark_mode,
+                              color: themeProvider.isDarkMode 
+                                  ? AppColors.darkText
+                                  : Colors.white,
+                              size: 24,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
                   ],
                 ),
               ),
@@ -109,11 +139,15 @@ class HomePage extends StatelessWidget {
                         Container(
                           padding: EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.13),
+                            color: themeProvider.isDarkMode 
+                                ? Colors.white.withOpacity(0.05)
+                                : Colors.white.withOpacity(0.13),
                             borderRadius: BorderRadius.circular(18),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black12,
+                                color: themeProvider.isDarkMode 
+                                    ? Colors.black26
+                                    : Colors.black12,
                                 blurRadius: 8,
                                 offset: Offset(0, 2),
                               ),
@@ -128,14 +162,18 @@ class HomePage extends StatelessWidget {
                                 children: [
                                   Text("Mood Tracker",
                                       style: TextStyle(
-                                          color: Colors.white,
+                                          color: themeProvider.isDarkMode 
+                                              ? AppColors.darkText
+                                              : Colors.white,
                                           fontWeight: FontWeight.bold,
                                           fontSize: 18)),
                                   GestureDetector(
                                     onTap: () => Navigator.push(context,
                                         createRoute(MoodTrackerPage())),
                                     child: Icon(Icons.chevron_right,
-                                        color: Colors.white),
+                                        color: themeProvider.isDarkMode 
+                                            ? AppColors.darkText
+                                            : Colors.white),
                                   ),
                                 ],
                               ),
@@ -161,7 +199,9 @@ class HomePage extends StatelessWidget {
                         SizedBox(height: 28),
                         Text("Let's explore",
                             style: TextStyle(
-                                color: Colors.white,
+                                color: themeProvider.isDarkMode 
+                                    ? AppColors.darkText
+                                    : Colors.white,
                                 fontSize: 20,
                                 fontWeight: FontWeight.bold)),
                         SizedBox(height: 14),
@@ -179,25 +219,33 @@ class HomePage extends StatelessWidget {
                                 "Journal",
                                 "assets/card/journal.PNG",
                                 JournalPage(),
-                                AppColors.hotPink),
+                                themeProvider.isDarkMode 
+                                    ? AppColors.darkJournal
+                                    : AppColors.lightJournal),
                             _featureCard(
                                 context,
                                 "Meditation",
                                 "assets/card/meditation.png",
                                 MeditationPage(),
-                                Color(0xFFB388FF)),
+                                themeProvider.isDarkMode 
+                                    ? AppColors.darkMeditation
+                                    : AppColors.lightMeditation),
                             _featureCard(
                                 context,
                                 "Goals",
                                 "assets/card/goals.png",
                                 GoalPage(),
-                                Color(0xFF80CBC4)),
+                                themeProvider.isDarkMode 
+                                    ? AppColors.darkGoals
+                                    : AppColors.lightGoals),
                             _featureCard(
                                 context,
                                 "Motivation",
                                 "assets/card/motivation.png",
                                 MotivationPage(),
-                                Color(0xFFFFAB91)),
+                                themeProvider.isDarkMode 
+                                    ? AppColors.darkMotivation
+                                    : AppColors.lightMotivation),
                           ],
                         ),
                         SizedBox(height: 18),
@@ -206,10 +254,12 @@ class HomePage extends StatelessWidget {
                   ),
                 ),
               ),
-            ],
-          ),
-        ),
-      ),
-    );
+            ], // Close Column children
+          ), // Close Column
+        ), // Close SafeArea
+      ), // Close Container
+    ); // Close Scaffold
+    }, // Close builder function
+  ); // Close Consumer
   }
 }

@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:lottie/lottie.dart';
 import 'dart:async';
+import 'package:provider/provider.dart';
+import '../providers/theme_provider.dart';
+import '../theme.dart';
 
 class MeditationSession {
   final String name;
@@ -263,23 +266,29 @@ class _MeditationPageState extends State<MeditationPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
-        child: Container(
-          width: MediaQuery.of(context).size.width,
-          padding: const EdgeInsets.all(20),
-          child: patternSelectionMode
-              ? _buildPatternSelectionUI()
-              : sessionReady
-                  ? _buildActiveSessionUI()
-                  : _buildSessionSelectionUI(),
-        ),
-      ),
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, child) {
+        return Scaffold(
+          backgroundColor: themeProvider.isDarkMode 
+              ? AppColors.darkPurple
+              : Colors.white,
+          body: SafeArea(
+            child: Container(
+              width: MediaQuery.of(context).size.width,
+              padding: const EdgeInsets.all(20),
+              child: patternSelectionMode
+                  ? _buildPatternSelectionUI(themeProvider)
+                  : sessionReady
+                      ? _buildActiveSessionUI(themeProvider)
+                      : _buildSessionSelectionUI(themeProvider),
+            ),
+          ),
+        );
+      },
     );
   }
 
-  Widget _buildSessionSelectionUI() {
+  Widget _buildSessionSelectionUI(ThemeProvider themeProvider) {
     // Description for the selected session
     String sessionDescription = "";
     if (selectedSession != null) {
@@ -303,12 +312,14 @@ class _MeditationPageState extends State<MeditationPage> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           // Title
-          const Text(
+          Text(
             "Meditation",
             style: TextStyle(
               fontSize: 30,
               fontWeight: FontWeight.bold,
-              color: Colors.black,
+              color: themeProvider.isDarkMode 
+                  ? AppColors.darkText
+                  : Colors.black,
             ),
           ),
           const SizedBox(height: 20),
@@ -318,7 +329,9 @@ class _MeditationPageState extends State<MeditationPage> {
             width: double.infinity,
             height: 200,
             decoration: BoxDecoration(
-              color: backgroundPink,
+              color: themeProvider.isDarkMode 
+                  ? AppColors.mediumPurple.withOpacity(0.3)
+                  : backgroundPink,
               borderRadius: BorderRadius.circular(16),
             ),
             child: Center(
@@ -378,11 +391,15 @@ class _MeditationPageState extends State<MeditationPage> {
                 child: Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: isSelected ? appThemeColor : Colors.white,
+                    color: isSelected 
+                        ? (themeProvider.isDarkMode ? AppColors.accentPurple : appThemeColor)
+                        : (themeProvider.isDarkMode ? AppColors.mediumPurple : Colors.white),
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.grey.withOpacity(0.1),
+                        color: themeProvider.isDarkMode 
+                            ? Colors.black26
+                            : Colors.grey.withOpacity(0.1),
                         spreadRadius: 1,
                         blurRadius: 4,
                         offset: const Offset(0, 2),
@@ -402,7 +419,9 @@ class _MeditationPageState extends State<MeditationPage> {
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
-                              color: isSelected ? Colors.white : Colors.black,
+                              color: isSelected 
+                                  ? Colors.white
+                                  : (themeProvider.isDarkMode ? AppColors.darkText : Colors.black),
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -410,8 +429,9 @@ class _MeditationPageState extends State<MeditationPage> {
                             "${session.durationSeconds ~/ 60} min",
                             style: TextStyle(
                               fontSize: 16,
-                              color:
-                                  isSelected ? Colors.white70 : Colors.black54,
+                              color: isSelected 
+                                  ? Colors.white70
+                                  : (themeProvider.isDarkMode ? AppColors.darkSecondaryText : Colors.black54),
                             ),
                           ),
                         ],
@@ -422,14 +442,18 @@ class _MeditationPageState extends State<MeditationPage> {
                         decoration: BoxDecoration(
                           color: isSelected
                               ? Colors.white.withOpacity(0.3)
-                              : Colors.grey.withOpacity(0.1),
+                              : (themeProvider.isDarkMode 
+                                  ? Colors.grey.withOpacity(0.3)
+                                  : Colors.grey.withOpacity(0.1)),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Text(
                           tagLabel,
                           style: TextStyle(
                             fontSize: 12,
-                            color: isSelected ? Colors.white : Colors.black87,
+                            color: isSelected 
+                                ? Colors.white 
+                                : (themeProvider.isDarkMode ? AppColors.darkSecondaryText : Colors.black87),
                           ),
                         ),
                       ),
@@ -447,13 +471,23 @@ class _MeditationPageState extends State<MeditationPage> {
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.grey[50],
+                color: themeProvider.isDarkMode 
+                    ? AppColors.mediumPurple 
+                    : Colors.grey[50],
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: Colors.grey.shade200),
+                border: Border.all(
+                  color: themeProvider.isDarkMode 
+                      ? AppColors.lightPurple 
+                      : Colors.grey.shade200
+                ),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.spa, color: appThemeColor, size: 32),
+                  Icon(
+                    Icons.spa, 
+                    color: themeProvider.isDarkMode ? AppColors.accentPurple : appThemeColor, 
+                    size: 32
+                  ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(
@@ -461,9 +495,10 @@ class _MeditationPageState extends State<MeditationPage> {
                       children: [
                         Text(
                           selectedSession!.name.split(' (')[0],
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.bold,
+                            color: themeProvider.isDarkMode ? AppColors.darkText : Colors.black,
                           ),
                         ),
                         const SizedBox(height: 4),
@@ -471,7 +506,9 @@ class _MeditationPageState extends State<MeditationPage> {
                           sessionDescription,
                           style: TextStyle(
                             fontSize: 13,
-                            color: Colors.grey[700],
+                            color: themeProvider.isDarkMode 
+                                ? AppColors.darkSecondaryText 
+                                : Colors.grey[700],
                           ),
                         ),
                       ],
@@ -493,10 +530,12 @@ class _MeditationPageState extends State<MeditationPage> {
                   });
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: appThemeColor,
+                  backgroundColor: themeProvider.isDarkMode 
+                      ? AppColors.accentPurple 
+                      : appThemeColor,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
                 child: const Text(
@@ -518,7 +557,7 @@ class _MeditationPageState extends State<MeditationPage> {
   }
 
   // Pattern selection UI remains the same
-  Widget _buildPatternSelectionUI() {
+  Widget _buildPatternSelectionUI(ThemeProvider themeProvider) {
     return Column(
       children: [
         Row(
@@ -548,13 +587,15 @@ class _MeditationPageState extends State<MeditationPage> {
                 margin: const EdgeInsets.only(bottom: 16),
                 elevation: selectedBreathingPattern == pattern ? 3 : 1,
                 color: selectedBreathingPattern == pattern
-                    ? appThemeColor.withOpacity(0.1)
-                    : Colors.white,
+                    ? (themeProvider.isDarkMode 
+                        ? AppColors.accentPurple.withOpacity(0.3)
+                        : appThemeColor.withOpacity(0.1))
+                    : (themeProvider.isDarkMode ? AppColors.mediumPurple : Colors.white),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                   side: BorderSide(
                     color: selectedBreathingPattern == pattern
-                        ? appThemeColor
+                        ? (themeProvider.isDarkMode ? AppColors.accentPurple : appThemeColor)
                         : Colors.transparent,
                     width: 2,
                   ),
@@ -572,9 +613,10 @@ class _MeditationPageState extends State<MeditationPage> {
                       children: [
                         Text(
                           pattern.name,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
+                            color: themeProvider.isDarkMode ? AppColors.darkText : Colors.black,
                           ),
                         ),
                         const SizedBox(height: 8),
@@ -582,7 +624,9 @@ class _MeditationPageState extends State<MeditationPage> {
                           pattern.description,
                           style: TextStyle(
                             fontSize: 14,
-                            color: Colors.grey[700],
+                            color: themeProvider.isDarkMode 
+                                ? AppColors.darkSecondaryText 
+                                : Colors.grey[700],
                           ),
                         ),
                       ],
@@ -606,12 +650,16 @@ class _MeditationPageState extends State<MeditationPage> {
                   }
                 : null,
             style: ElevatedButton.styleFrom(
-              backgroundColor: appThemeColor,
+              backgroundColor: themeProvider.isDarkMode 
+                  ? AppColors.accentPurple 
+                  : appThemeColor,
               padding: const EdgeInsets.symmetric(vertical: 16),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(12),
               ),
-              disabledBackgroundColor: Colors.grey[300],
+              disabledBackgroundColor: themeProvider.isDarkMode 
+                  ? Colors.grey[700] 
+                  : Colors.grey[300],
             ),
             child: const Text(
               "Begin Session",
@@ -628,7 +676,7 @@ class _MeditationPageState extends State<MeditationPage> {
   }
 
   // Updated active session UI with Start button and proper phase display
-  Widget _buildActiveSessionUI() {
+  Widget _buildActiveSessionUI(ThemeProvider themeProvider) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -660,10 +708,10 @@ class _MeditationPageState extends State<MeditationPage> {
         // Large breathing phase name
         Text(
           breathPhase,
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 48,
             fontWeight: FontWeight.bold,
-            color: Colors.black,
+            color: themeProvider.isDarkMode ? AppColors.darkText : Colors.black,
           ),
         ),
 
@@ -678,7 +726,9 @@ class _MeditationPageState extends State<MeditationPage> {
                 "Ready to begin your ${selectedSession!.name.split(' (')[0].toLowerCase()} session",
                 style: TextStyle(
                   fontSize: 16,
-                  color: Colors.grey[600],
+                  color: themeProvider.isDarkMode 
+                      ? AppColors.darkSecondaryText 
+                      : Colors.grey[600],
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -688,7 +738,7 @@ class _MeditationPageState extends State<MeditationPage> {
                 child: ElevatedButton(
                   onPressed: startSession,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: appThemeColor,
+                    backgroundColor: themeProvider.isDarkMode ? AppColors.accentPurple : appThemeColor,
                     foregroundColor: Colors.white,
                     padding: const EdgeInsets.symmetric(vertical: 16),
                     shape: RoundedRectangleBorder(
@@ -714,7 +764,7 @@ class _MeditationPageState extends State<MeditationPage> {
             countdownText,
             style: TextStyle(
               fontSize: 24,
-              color: appThemeColor,
+              color: themeProvider.isDarkMode ? AppColors.darkText : appThemeColor,
               fontWeight: FontWeight.w500,
             ),
           )
@@ -724,7 +774,7 @@ class _MeditationPageState extends State<MeditationPage> {
             countdownText,
             style: TextStyle(
               fontSize: 36,
-              color: appThemeColor,
+              color: themeProvider.isDarkMode ? AppColors.accentPurple : appThemeColor,
               fontWeight: FontWeight.bold,
             ),
           ),
@@ -734,9 +784,10 @@ class _MeditationPageState extends State<MeditationPage> {
         // Session countdown timer
         Text(
           "${(remainingSeconds ~/ 60).toString().padLeft(2, '0')}:${(remainingSeconds % 60).toString().padLeft(2, '0')}",
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 40,
             fontWeight: FontWeight.bold,
+            color: themeProvider.isDarkMode ? AppColors.darkText : Colors.black,
           ),
         ),
 
@@ -758,11 +809,17 @@ class _MeditationPageState extends State<MeditationPage> {
               });
             },
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
+              backgroundColor: themeProvider.isDarkMode 
+                  ? AppColors.mediumPurple 
+                  : Colors.red[600],
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(vertical: 16),
+              elevation: themeProvider.isDarkMode ? 2 : 4,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(12),
+                side: themeProvider.isDarkMode 
+                    ? BorderSide(color: AppColors.lightPurple, width: 1)
+                    : BorderSide.none,
               ),
             ),
             child: const Text(

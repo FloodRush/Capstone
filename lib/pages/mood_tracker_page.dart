@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:project/theme.dart';
+import 'package:project/providers/theme_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 
 class MoodTrackerPage extends StatefulWidget {
@@ -82,54 +84,104 @@ class _MoodTrackerPageState extends State<MoodTrackerPage> {
   @override
   Widget build(BuildContext context) {
     //Whole Mood Calendar
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Mood Tracker'),
-        centerTitle: true,
-        backgroundColor: AppColors.lightPink,
-      ),
-      body: Column(
-        children: [
-          TableCalendar(
-            //Actual calendar
-            firstDay: DateTime.utc(2025, 1, 1),
-            lastDay: DateTime.utc(2030, 12, 31),
-            focusedDay: _focusedDay,
-            selectedDayPredicate: (day) {
-              return isSameDay(_selectedDay, day);
-            },
-            onDaySelected: (selectedDay, focusedDay) {
-              //Highlights current and selected day. May change how they are able to be used
-              setState(() {
-                _selectedDay = selectedDay;
-                _focusedDay = focusedDay;
-              });
-              _selectMoodsForDay(selectedDay);
-            },
-            calendarStyle: CalendarStyle(
-              markerDecoration: BoxDecoration(
-                //Dots for days with submission
-                color: Colors.pink[200],
-                shape: BoxShape.circle,
+    return Consumer<ThemeProvider>(
+      builder: (context, themeProvider, child) {
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('Mood Tracker'),
+            centerTitle: true,
+            backgroundColor: themeProvider.isDarkMode 
+                ? AppColors.mediumPurple 
+                : AppColors.lightPink,
+            foregroundColor: Colors.white,
+          ),
+          body: Column(
+            children: [
+              TableCalendar(
+                //Actual calendar
+                firstDay: DateTime.utc(2025, 1, 1),
+                lastDay: DateTime.utc(2030, 12, 31),
+                focusedDay: _focusedDay,
+                selectedDayPredicate: (day) {
+                  return isSameDay(_selectedDay, day);
+                },
+                onDaySelected: (selectedDay, focusedDay) {
+                  //Highlights current and selected day. May change how they are able to be used
+                  setState(() {
+                    _selectedDay = selectedDay;
+                    _focusedDay = focusedDay;
+                  });
+                  _selectMoodsForDay(selectedDay);
+                },
+                calendarStyle: CalendarStyle(
+                  markerDecoration: BoxDecoration(
+                    //Dots for days with submission
+                    color: themeProvider.isDarkMode 
+                        ? AppColors.accentPurple 
+                        : Colors.pink[200],
+                    shape: BoxShape.circle,
+                  ),
+                  selectedDecoration: BoxDecoration(
+                    color: themeProvider.isDarkMode 
+                        ? AppColors.accentPurple 
+                        : AppColors.hotPink,
+                    shape: BoxShape.circle,
+                  ),
+                  todayDecoration: BoxDecoration(
+                    color: themeProvider.isDarkMode 
+                        ? AppColors.lightPurple 
+                        : AppColors.darkPink,
+                    shape: BoxShape.circle,
+                  ),
+                  defaultTextStyle: TextStyle(
+                    color: themeProvider.isDarkMode ? AppColors.darkText : Colors.black,
+                  ),
+                  weekendTextStyle: TextStyle(
+                    color: themeProvider.isDarkMode ? AppColors.darkSecondaryText : Colors.black54,
+                  ),
+                ),
+                headerStyle: HeaderStyle(
+                  formatButtonTextStyle: TextStyle(
+                    color: themeProvider.isDarkMode ? AppColors.darkText : Colors.black,
+                  ),
+                  titleTextStyle: TextStyle(
+                    color: themeProvider.isDarkMode ? AppColors.darkText : Colors.black,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                eventLoader: (day) => _getMoodsForDay(day),
               ),
-            ),
-            eventLoader: (day) => _getMoodsForDay(day),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            //Simple display for emotions saved
-            'Moods on ${_selectedDay.toLocal().toString().split(' ')[0]}:',
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          Wrap(
-            spacing: 8,
-            children: _getMoodsForDay(_selectedDay)
-                .map((mood) => Chip(label: Text(mood)))
-                .toList(),
-          )
+              const SizedBox(height: 16),
+              Text(
+                //Simple display for emotions saved
+                'Moods on ${_selectedDay.toLocal().toString().split(' ')[0]}:',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: themeProvider.isDarkMode ? AppColors.darkText : Colors.black,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                spacing: 8,
+                children: _getMoodsForDay(_selectedDay)
+                    .map((mood) => Chip(
+                      label: Text(
+                        mood,
+                        style: TextStyle(
+                          color: themeProvider.isDarkMode ? Colors.white : Colors.black87,
+                        ),
+                      ),
+                      backgroundColor: themeProvider.isDarkMode 
+                          ? AppColors.mediumPurple 
+                          : AppColors.lightPink,
+                    ))
+                    .toList(),
+              )
         ],
       ),
+    );
+      },
     );
   }
 }

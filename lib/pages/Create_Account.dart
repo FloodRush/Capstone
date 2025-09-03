@@ -22,33 +22,41 @@ class _MyCreateAccount extends State<MyCreateAccount> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: AppColors.hotPink,
-        title: Text(
-          widget.title,
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
-        centerTitle: true,
+    return Theme(
+      // Override theme for create account page to always use light theme
+      data: ThemeData.light().copyWith(
+        primaryColor: AppColors.hotPink,
       ),
-      backgroundColor: Colors.grey[300], // Rest of the screen bg color
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Email Field
-              TextFormField(
-                controller: _emailController,
-                decoration: const InputDecoration(
-                  labelText: 'Email',
-                  filled: true,
+      child: Scaffold(
+        appBar: AppBar(
+          backgroundColor: AppColors.hotPink,
+          title: Text(
+            widget.title,
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          centerTitle: true,
+          iconTheme: IconThemeData(color: Colors.white),
+        ),
+        backgroundColor: Colors.grey[300], // Rest of the screen bg color
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Email Field
+                TextFormField(
+                  controller: _emailController,
+                  style: TextStyle(color: Colors.black), // Ensure text is visible
+                  decoration: const InputDecoration(
+                    labelText: 'Email',
+                    labelStyle: TextStyle(color: Colors.black54),
+                    filled: true,
                   fillColor: Colors.white,
                   border: OutlineInputBorder(),
                 ),
@@ -68,8 +76,10 @@ class _MyCreateAccount extends State<MyCreateAccount> {
               // Password Field
               TextFormField(
                 controller: _passwordController,
+                style: TextStyle(color: Colors.black), // Ensure text is visible
                 decoration: const InputDecoration(
                   labelText: 'Password',
+                  labelStyle: TextStyle(color: Colors.black54),
                   filled: true,
                   fillColor: Colors.white,
                   border: OutlineInputBorder(),
@@ -122,14 +132,18 @@ class _MyCreateAccount extends State<MyCreateAccount> {
                     }
                   },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                        AppColors.hotPink, // Set the button color here
-                    foregroundColor: Colors.white, // Set the text color here
+                    backgroundColor: AppColors.hotPink, // Set the button color here
+                    foregroundColor: Colors.white, // Force white text
+                    textStyle: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   child: const Text('Create Account'),
                 ),
               ),
             ],
+          ),
           ),
         ),
       ),
