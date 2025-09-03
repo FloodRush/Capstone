@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:uuid/uuid.dart'; //Added by me
 import '../theme.dart';
 import '../services/auth_service.dart';
 import 'main_navigation.dart';
@@ -19,7 +20,11 @@ class _MyCreateAccount extends State<MyCreateAccount> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-
+  //Added by me
+  String generateID(){
+  var id=Uuid();
+  return id.v4();
+  }
   @override
   Widget build(BuildContext context) {
     return Theme(
@@ -107,7 +112,7 @@ class _MyCreateAccount extends State<MyCreateAccount> {
                           email: _emailController.text,
                           password: _passwordController.text,
                         );
-
+                        var myId=generateID;//added by me
                         // Store the email in Firestore
                         await FirebaseFirestore.instance
                             .collection("Users")
@@ -117,6 +122,7 @@ class _MyCreateAccount extends State<MyCreateAccount> {
                           'username': _emailController.text
                               .split('@')[0], // Use part of email as username
                           'bio': "empty bio...", // Default bio
+                          'id': myId//added by me
                         });
 
                         // Navigate to the homepage after successful signup
