@@ -1,12 +1,33 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
-
+import '../pages/Create_Account.dart';
 class JournalPage extends StatefulWidget {
   const JournalPage({super.key});
 
   @override
   State<JournalPage> createState() => _UIState();
 }
+//for id authentification
+//Future<void> currentUser(var user)
+//{
+
+//}
+//retrieving ids
+//Stream<QuerySnapshot> getUser()
+//{
+  var user = FirebaseAuth.instance;
+
+  //if(user != null)
+  //{
+    //return FirebaseFirestore.instance
+     // .collection("Users")
+     // .where('id', isEqualTo: user.myId)
+      //.snapshots();
+    //}
+     // else{print("This user does not exist");}
+//}
 
 class _UIState extends State<JournalPage> {
   final List<String> entry = [];
@@ -55,22 +76,31 @@ class _UIState extends State<JournalPage> {
 //view function to view journal entries
   view(viewed) {
     int i = name.indexOf(viewed.trim());
-    if (entry.isNotEmpty && i != -1) {
-      // SizedBox(
-      //  height: 100,
-      // width: 30,
-      // child: Text(entry),
-      //);
-      //for testing
-      print(date[i]);
-      print(name[i]);
-      print(entry[i]);
-    } else if (entry.isEmpty) {
-      print('Entry does not exist');
-    }
-  }
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          if (entry.isNotEmpty && i != -1) {
+            return AlertDialog(
+            title: Text('Name: ${name[i]}'),
+            content: Text('Date: ${date[i]}\n\n${entry[i]}'),
+              );
+            } else if (entry.isEmpty) {
+        print('Entry does not exist');
+        return AlertDialog(
+          title: Text('Error'),
+          content: Text('Entry does not exist'),
+        );
+        } else {
+        return AlertDialog(
+          title: Text('Invalid'),
+          content: Text('Invalid index'),
+        );
+      }
+    },
+  );
+}
 
-  @override
+ @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -148,14 +178,7 @@ class _UIState extends State<JournalPage> {
                       ),
                     ),
                   ),
-                  ElevatedButton(
-                    onPressed: () {
-                      if (formkey.currentState!.validate()) {
-                        print("Stored!");
-                      }
-                    },
-                    child: Text("Confirm"),
-                  ),
+                  
                   Text('Entry'),
                   SizedBox(
                     height: 100,
@@ -168,14 +191,6 @@ class _UIState extends State<JournalPage> {
                         contentPadding: EdgeInsets.symmetric(horizontal: 10.0),
                       ),
                     ),
-                  ),
-                  ElevatedButton(
-                    onPressed: () {
-                      if (formkey.currentState!.validate()) {
-                        print("Stored!");
-                      }
-                    },
-                    child: Text("Confirm"),
                   ),
                 ],
               ),
