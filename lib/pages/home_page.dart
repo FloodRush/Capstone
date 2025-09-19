@@ -9,9 +9,135 @@ import 'mood_tracker_page.dart';
 import 'profile_page.dart';
 import 'package:provider/provider.dart';
 import '../providers/theme_provider.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'dart:async';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
+
+  @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  final ScrollController _exploreScrollController = ScrollController();
+  late final List<Map<String, dynamic>> cardData;
+  late final List<Map<String, dynamic>> activityCards;
+  int _currentExploreIndex = 0;
+  Timer? _autoScrollTimer;
+  int _scrollSpeed = 1; // Default speed multiplier
+
+  @override
+  void initState() {
+    super.initState();
+    cardData = [
+      {
+        'label': 'Journal',
+        'imagePath': 'assets/card/journal.PNG',
+        'page': JournalPage(),
+        'color': AppColors.lightJournal,
+      },
+      {
+        'label': 'Meditation',
+        'imagePath': 'assets/card/meditation.png',
+        'page': MeditationPage(),
+        'color': AppColors.lightMeditation,
+      },
+      {
+        'label': 'Goals',
+        'imagePath': 'assets/card/goals.png',
+        'page': GoalPage(),
+        'color': AppColors.lightGoals,
+      },
+      {
+        'label': 'Motivation',
+        'imagePath': 'assets/card/motivation.png',
+        'page': MotivationPage(),
+        'color': AppColors.lightMotivation,
+      },
+    ];
+    activityCards = [
+      {
+        'title': 'Reflect & Release',
+        'time': '10 mins',
+        'desc': 'Journaling helps clear your mind and capture your thoughts. Write down one thing you’re grateful for today.',
+        'button': 'Begin',
+        'image': 'assets/card/journalCard.png',
+        'page': JournalPage(),
+      },
+      {
+        'title': 'Find Your Calm',
+        'time': '5 mins',
+        'desc': 'Take a deep breath and follow a short guided meditation to reset your energy.',
+        'button': 'Play',
+        'image': 'assets/card/meditationCard.png',
+        'page': MeditationPage(),
+      },
+      {
+        'title': 'Stay on Track',
+        'time': 'Flexible',
+        'desc': 'Choose one small goal for today. Taking small steps builds long-term success.',
+        'button': 'Set Goal',
+        'image': 'assets/card/goalCard.png',
+        'page': GoalPage(),
+      },
+      {
+        'title': 'Your Quote of the Day',
+        'time': '2 mins',
+        'desc': 'Pause and reflect: “Every day is a fresh start.” Carry this thought with you.',
+        'button': 'Read More',
+        'image': 'assets/card/motivationCard.png',
+        'page': MotivationPage(),
+      },
+    ];
+    Future.delayed(const Duration(milliseconds: 800), _startAutoScroll);
+  }
+
+  void _startAutoScroll() {
+    _autoScrollTimer?.cancel();
+    _autoScrollTimer = Timer.periodic(const Duration(milliseconds: 20), (timer) {
+      if (!mounted) return;
+      double maxScroll = _exploreScrollController.position.maxScrollExtent;
+      double current = _exploreScrollController.offset;
+      double next = current + (0.7 * _scrollSpeed);
+      if (next >= maxScroll) {
+        _exploreScrollController.jumpTo(0);
+      } else {
+        _exploreScrollController.jumpTo(next);
+      }
+    });
+  }
+
+  void _boostScrollSpeed() {
+    setState(() {
+      _scrollSpeed = 3; // Increase speed
+    });
+    Future.delayed(const Duration(seconds: 2), () {
+      if (mounted) {
+        setState(() {
+          _scrollSpeed = 1; // Reset speed
+        });
+      }
+    });
+  }
+
+  void _scrollToNextExploreCard() {
+    setState(() {
+      _currentExploreIndex = (_currentExploreIndex + 1) % cardData.length;
+    });
+    _exploreScrollController.animateTo(
+      _currentExploreIndex * 178.0, // 160 width + 18 margin
+      duration: const Duration(milliseconds: 600),
+      curve: Curves.easeInOut,
+    );
+  }
+
+  @override
+  void dispose() {
+    _autoScrollTimer?.cancel();
+    _exploreScrollController.dispose();
+    super.dispose();
+  }
 
   Widget _featureCard(BuildContext context, String label, String imagePath,
       Widget page, Color color) {
@@ -21,26 +147,13 @@ class HomePage extends StatelessWidget {
         elevation: 4,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         color: color,
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(20),
-            image: DecorationImage(
-              image: AssetImage(imagePath),
-              fit: BoxFit.cover,
-            ),
-          ),
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Colors.transparent,
-                  color.withOpacity(0.3),
-                ],
-              ),
-            ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: Image.asset(
+            imagePath,
+            fit: BoxFit.cover,
+            width: double.infinity,
+            height: double.infinity,
           ),
         ),
       ),
@@ -178,75 +291,157 @@ class HomePage extends StatelessWidget {
                                 ],
                               ),
                               SizedBox(height: 10),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceEvenly,
-                                children: ["😠", "🙂", "😭", "😴", "😃", "🥲"]
-                                    .map((emoji) => GestureDetector(
-                                          onTap: () {},
-                                          child: CircleAvatar(
-                                            backgroundColor: Colors.white24,
-                                            radius: 22,
-                                            child: Text(emoji,
-                                                style: TextStyle(fontSize: 22)),
-                                          ),
-                                        ))
-                                    .toList(),
-                              ),
+                              MoodSelectionRow(),
                             ],
                           ),
                         ),
                         SizedBox(height: 28),
-                        Text("Let's explore",
-                            style: TextStyle(
-                                color: themeProvider.isDarkMode 
-                                    ? AppColors.darkText
-                                    : Colors.white,
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold)),
+                        // Let's explore section
+                        Text(
+                          "Let's explore",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                         SizedBox(height: 14),
-                        SizedBox(height: 20), // Added extra spacing
-                        GridView.count(
-                          crossAxisCount: 2,
+                        Stack(
+                          children: [
+                            SizedBox(
+                              height: 180,
+                              width: double.infinity,
+                              child: ListView.builder(
+                                controller: _exploreScrollController,
+                                scrollDirection: Axis.horizontal,
+                                itemCount: cardData.length,
+                                itemBuilder: (context, index) {
+                                  final card = cardData[index];
+                                  return Container(
+                                    width: 160,
+                                    margin: EdgeInsets.only(right: 18),
+                                    child: _featureCard(
+                                      context,
+                                      card['label'] as String,
+                                      card['imagePath'] as String,
+                                      card['page'] as Widget,
+                                      card['color'] as Color,
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                            Positioned(
+                              right: 0,
+                              top: 0,
+                              bottom: 0,
+                              child: Center(
+                                child: IconButton(
+                                  icon: Icon(Icons.chevron_right, color: Colors.white, size: 32),
+                                  onPressed: _boostScrollSpeed,
+                                  tooltip: 'Next',
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 18),
+                        // Motivational Activity Feed (Vertical Scroll)
+                        Text(
+                          "Today's Activity",
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(height: 12),
+                        ListView.builder(
+                          itemCount: activityCards.length,
                           shrinkWrap: true,
                           physics: NeverScrollableScrollPhysics(),
-                          crossAxisSpacing: 18,
-                          mainAxisSpacing: 18,
-                          childAspectRatio: 1, // Make cards square
-                          children: [
-                            _featureCard(
-                                context,
-                                "Journal",
-                                "assets/card/journal.PNG",
-                                JournalPage(),
-                                themeProvider.isDarkMode 
-                                    ? AppColors.darkJournal
-                                    : AppColors.lightJournal),
-                            _featureCard(
-                                context,
-                                "Meditation",
-                                "assets/card/meditation.png",
-                                MeditationPage(),
-                                themeProvider.isDarkMode 
-                                    ? AppColors.darkMeditation
-                                    : AppColors.lightMeditation),
-                            _featureCard(
-                                context,
-                                "Goals",
-                                "assets/card/goals.png",
-                                GoalPage(),
-                                themeProvider.isDarkMode 
-                                    ? AppColors.darkGoals
-                                    : AppColors.lightGoals),
-                            _featureCard(
-                                context,
-                                "Motivation",
-                                "assets/card/motivation.png",
-                                MotivationPage(),
-                                themeProvider.isDarkMode 
-                                    ? AppColors.darkMotivation
-                                    : AppColors.lightMotivation),
-                          ],
+                          itemBuilder: (context, index) {
+                            final card = activityCards[index];
+                            final buttonLabels = ["Write", "Start", "Set", "See"];
+                            return Container(
+                              margin: const EdgeInsets.symmetric(vertical: 10),
+                              decoration: BoxDecoration(
+                                color: themeProvider.isDarkMode 
+                                    ? Colors.white.withOpacity(0.05)
+                                    : Colors.white.withOpacity(0.13),
+                                borderRadius: BorderRadius.circular(18),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: themeProvider.isDarkMode 
+                                        ? Colors.black26
+                                        : Colors.black12,
+                                    blurRadius: 8,
+                                    offset: Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.all(22),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    SizedBox(
+                                      width: 170,
+                                      height: 210, // Higher height for image
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(22),
+                                        child: Image.asset(
+                                          card['image'] as String,
+                                          width: 170,
+                                          height: 210,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 18),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            card['title'] as String,
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.w400,
+                                              fontSize: 22,
+                                              color: Colors.black,
+                                              letterSpacing: 0.2,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 8),
+                                          Text(
+                                            card['desc'] as String,
+                                            style: const TextStyle(fontSize: 16, color: Colors.black87, fontWeight: FontWeight.w400, letterSpacing: 0.1),
+                                          ),
+                                          const SizedBox(height: 18),
+                                          Align(
+                                            alignment: Alignment.bottomRight,
+                                            child: ElevatedButton(
+                                              style: ElevatedButton.styleFrom(
+                                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                                                backgroundColor: themeProvider.isDarkMode ? Colors.white.withOpacity(0.18) : AppColors.hotPink,
+                                                foregroundColor: themeProvider.isDarkMode ? Colors.black : Colors.white,
+                                                padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+                                                elevation: 0,
+                                              ),
+                                              onPressed: () {
+                                                Navigator.pop(context);
+                                              },
+                                              child: Text(buttonLabels[index], style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w400)),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
                         ),
                         SizedBox(height: 18),
                       ],
@@ -261,5 +456,107 @@ class HomePage extends StatelessWidget {
     ); // Close Scaffold
     }, // Close builder function
   ); // Close Consumer
+  }
+}
+
+class MoodSelectionRow extends StatefulWidget {
+  @override
+  State<MoodSelectionRow> createState() => _MoodSelectionRowState();
+}
+
+class _MoodSelectionRowState extends State<MoodSelectionRow>
+    with SingleTickerProviderStateMixin {
+  int? selectedIndex;
+  late AnimationController _controller;
+  late Animation<double> _scaleAnim;
+
+  final List<String> emojis = ["😭", "😃", "😠", "😴", "😊"];
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 180),
+    );
+    _scaleAnim = Tween<double>(begin: 1.0, end: 1.35)
+        .chain(CurveTween(curve: Curves.easeOut))
+        .animate(_controller);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _onTap(int index) async {
+    setState(() {
+      selectedIndex = index;
+    });
+    await _controller.forward();
+    await _controller.reverse();
+    Future.delayed(const Duration(milliseconds: 250), () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => MoodTrackerPage()),
+      ).then((_) {
+        // Reset selection and glow when returning to home page
+        setState(() {
+          selectedIndex = null;
+        });
+      });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: List.generate(emojis.length, (i) {
+        final isSelected = selectedIndex == i;
+        return GestureDetector(
+          onTap: () => _onTap(i),
+          child: AnimatedBuilder(
+            animation: _controller,
+            child: CircleAvatar(
+              backgroundColor: isSelected
+                  ? Colors.white.withOpacity(0.18)
+                  : Colors.white24,
+              radius: 26, // Smaller size
+              child: Text(
+                emojis[i],
+                style: const TextStyle(fontSize: 30),
+              ),
+            ),
+            builder: (context, child) {
+              double scale = isSelected ? _scaleAnim.value : 1.0;
+              double opacity = (selectedIndex == null || isSelected) ? 1.0 : 0.75;
+              return Opacity(
+                opacity: opacity,
+                child: Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    boxShadow: isSelected
+                        ? [
+                            BoxShadow(
+                              color: Colors.white.withOpacity(0.45),
+                              blurRadius: 28,
+                              spreadRadius: 2,
+                            ),
+                          ]
+                        : [],
+                  ),
+                  child: Transform.scale(
+                    scale: scale,
+                    child: child,
+                  ),
+                ),
+              );
+            },
+          ),
+        );
+      }),
+    );
   }
 }

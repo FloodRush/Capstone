@@ -85,6 +85,10 @@ flutter:
     - assets/card/journal.PNG
     - assets/card/goals.png
     - assets/card/meditation.png
+    - assets/card/journalCard.png
+    - assets/card/meditationCard.png
+    - assets/card/goalCard.png
+    - assets/card/motivationCard.png
 
   # To add assets to your application, add an assets section, like this:
   # assets:
