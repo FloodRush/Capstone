@@ -112,7 +112,7 @@ class _MyCreateAccount extends State<MyCreateAccount> {
                           email: _emailController.text,
                           password: _passwordController.text,
                         );
-                        var myId=generateID;//added by me
+                        var myId = generateID(); // fixed: call the function to get the ID string
                         // Store the email in Firestore
                         await FirebaseFirestore.instance
                             .collection("Users")
@@ -122,7 +122,7 @@ class _MyCreateAccount extends State<MyCreateAccount> {
                           'username': _emailController.text
                               .split('@')[0], // Use part of email as username
                           'bio': "empty bio...", // Default bio
-                          'id': myId//added by me
+                          'id': myId // now stores the actual generated ID
                         });
 
                         // Navigate to the homepage after successful signup

@@ -8,6 +8,7 @@ import 'package:table_calendar/table_calendar.dart';
 import 'pages/mood_tracker_page.dart';
 import 'package:provider/provider.dart';
 import 'providers/theme_provider.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 
 Future<void> main() async {
@@ -15,6 +16,7 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+  await Hive.initFlutter();
   runApp(
     ChangeNotifierProvider(
       create: (context) => ThemeProvider(),
