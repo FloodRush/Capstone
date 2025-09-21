@@ -97,6 +97,11 @@ flutter:
     - assets/icons/angry.png
     - assets/icons/stressed.png
     - assets/icons/loved.png
+    # Icons
+    - assets/icons/add_icon.png
+    - assets/icons/delete_icon.png
+    - assets/icons/edit_icon.png
+    - assets/icons/view_icon.png
    
 
   # To add assets to your application, add an assets section, like this:
