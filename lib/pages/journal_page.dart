@@ -229,35 +229,45 @@ class _UIState extends State<JournalPage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
-                  GestureDetector(
-                    onTap: () {
-                      showCupertinoModalPopup(
-                        context: context,
-                        builder: (context) => SizedBox(
-                          height: 300,
-                          child: CupertinoDatePicker(
-                            initialDateTime: startDate,
-                            onDateTimeChanged: (DateTime date) {
-                              setState(() {
-                                startDate = date;
-                                dateController.text =
-                                    "${date.year}/${date.month}/${date.day}";
-                              });
-                            },
-                            use24hFormat: true,
-                            mode: CupertinoDatePickerMode.date,
-                          ),
-                        ),
-                      );
-                    },
-                    child: Column(
+                    Column(
                       children: [
                         Text('Date'),
                         SizedBox(
                           height: 30,
                           width: 300,
                           child: TextField(
-                            controller: dateController,
+                          controller: dateController,
+                          readOnly: true,
+                          onTap: () {
+                            showCupertinoModalPopup(
+                              context: context,
+                              builder: (context) => SizedBox(
+                              height: 300,
+                              child: Align(
+                              alignment: Alignment.center,
+                              child: SizedBox(
+                                height: 400,
+                              child: Opacity(
+                                opacity: 0.5,
+                              child: CupertinoDatePicker(
+                              initialDateTime: startDate,
+                              backgroundColor: Colors.white,                              
+                              onDateTimeChanged: (DateTime date) {
+                                setState(() {
+                                  startDate = date;
+                                  dateController.text =
+                                  "${date.year}/${date.month}/${date.day}";
+                                });
+                              },
+                            use24hFormat: true,
+                            mode: CupertinoDatePickerMode.date,
+                          ),
+                        ),
+                              ),
+                        ),
+                      ),
+                    );
+                  },
                             decoration: InputDecoration(
                               border: OutlineInputBorder(),
                               hintText: 'Date',
@@ -268,7 +278,7 @@ class _UIState extends State<JournalPage> {
                         ),
                       ],
                     ),
-                  ),
+                  //),
                   SizedBox(height: 20),
                   Text('Name'),
                   SizedBox(
