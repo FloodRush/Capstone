@@ -102,6 +102,12 @@ class _ProfilePageState extends State<ProfilePage> {
                     sectionName: 'username',
                     onPressed: () => editField('username'),
                   ),
+                  //birthday
+                  MyTextBox(
+                    text: userData['birthday'],
+                    sectionName: 'birthday',
+                    onPressed: () => editField('birthday'),
+                  ),
                   //bio
                   MyTextBox(
                     text: userData['bio'],
