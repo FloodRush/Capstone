@@ -122,7 +122,7 @@ class _MyCreateAccount extends State<MyCreateAccount> {
                           'username': _emailController.text
                               .split('@')[0], // Use part of email as username
                           'bio': "empty bio...", // Default bio
-                          'id': myId // now stores the actual generated ID
+                          'id': myId//added by me
                         });
 
                         // Navigate to the homepage after successful signup

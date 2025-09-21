@@ -250,11 +250,11 @@ class _HomePageState extends State<HomePage> {
                       children: [
                         // Mood Tracker
                         Container(
-                          padding: EdgeInsets.all(16),
+                          alignment: Alignment.center,
+                          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                          height: 210,
                           decoration: BoxDecoration(
-                            color: themeProvider.isDarkMode 
-                                ? Colors.white.withOpacity(0.05)
-                                : Colors.white.withOpacity(0.13),
+                            color: Colors.white.withOpacity(0.72), // Slightly lighter background
                             borderRadius: BorderRadius.circular(18),
                             boxShadow: [
                               BoxShadow(
@@ -267,26 +267,26 @@ class _HomePageState extends State<HomePage> {
                             ],
                           ),
                           child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
                               Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text("Mood Tracker",
                                       style: TextStyle(
                                           color: themeProvider.isDarkMode 
                                               ? AppColors.darkText
-                                              : Colors.white,
+                                              : Colors.black,
                                           fontWeight: FontWeight.bold,
-                                          fontSize: 18)),
+                                          fontSize: 18)), // Smaller text
                                   GestureDetector(
                                     onTap: () => Navigator.push(context,
                                         createRoute(MoodTrackerPage())),
                                     child: Icon(Icons.chevron_right,
                                         color: themeProvider.isDarkMode 
                                             ? AppColors.darkText
-                                            : Colors.white),
+                                            : Colors.black),
                                   ),
                                 ],
                               ),
@@ -470,7 +470,14 @@ class _MoodSelectionRowState extends State<MoodSelectionRow>
   late AnimationController _controller;
   late Animation<double> _scaleAnim;
 
-  final List<String> emojis = ["😭", "😃", "😠", "😴", "😊"];
+  final List<String> moodImages = [
+    'sad.png',
+    'happy.png',
+    'angry.png',
+    'sleepy.png',
+    'stressed.png',
+    'loved.png',
+  ];
 
   @override
   void initState() {
@@ -479,7 +486,7 @@ class _MoodSelectionRowState extends State<MoodSelectionRow>
       vsync: this,
       duration: const Duration(milliseconds: 180),
     );
-    _scaleAnim = Tween<double>(begin: 1.0, end: 1.35)
+    _scaleAnim = Tween<double>(begin: 1.0, end: 1.13)
         .chain(CurveTween(curve: Curves.easeOut))
         .animate(_controller);
   }
@@ -501,7 +508,6 @@ class _MoodSelectionRowState extends State<MoodSelectionRow>
         context,
         MaterialPageRoute(builder: (context) => MoodTrackerPage()),
       ).then((_) {
-        // Reset selection and glow when returning to home page
         setState(() {
           selectedIndex = null;
         });
@@ -511,52 +517,72 @@ class _MoodSelectionRowState extends State<MoodSelectionRow>
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-      children: List.generate(emojis.length, (i) {
-        final isSelected = selectedIndex == i;
-        return GestureDetector(
-          onTap: () => _onTap(i),
-          child: AnimatedBuilder(
-            animation: _controller,
-            child: CircleAvatar(
-              backgroundColor: isSelected
-                  ? Colors.white.withOpacity(0.18)
-                  : Colors.white24,
-              radius: 26, // Smaller size
-              child: Text(
-                emojis[i],
-                style: const TextStyle(fontSize: 30),
-              ),
-            ),
-            builder: (context, child) {
-              double scale = isSelected ? _scaleAnim.value : 1.0;
-              double opacity = (selectedIndex == null || isSelected) ? 1.0 : 0.75;
-              return Opacity(
-                opacity: opacity,
-                child: Container(
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    boxShadow: isSelected
-                        ? [
-                            BoxShadow(
-                              color: Colors.white.withOpacity(0.45),
-                              blurRadius: 28,
-                              spreadRadius: 2,
-                            ),
-                          ]
-                        : [],
-                  ),
-                  child: Transform.scale(
-                    scale: scale,
-                    child: child,
-                  ),
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: List.generate(3, (i) {
+            final isSelected = selectedIndex == i;
+            double imgSize = (i == 2 || i == 3) ? 64 : 54; // Angry & Sleepy bigger
+            return GestureDetector(
+              onTap: () => _onTap(i),
+              child: AnimatedBuilder(
+                animation: _controller,
+                child: Image.asset(
+                  'assets/icons/' + moodImages[i],
+                  width: imgSize,
+                  height: imgSize,
+                  fit: BoxFit.contain,
                 ),
-              );
-            },
-          ),
-        );
-      }),
+                builder: (context, child) {
+                  double scale = isSelected ? _scaleAnim.value : 1.0;
+                  double opacity = (selectedIndex == null || isSelected) ? 1.0 : 0.85;
+                  return Opacity(
+                    opacity: opacity,
+                    child: Transform.scale(
+                      scale: scale,
+                      child: child,
+                    ),
+                  );
+                },
+              ),
+            );
+          }),
+        ),
+        SizedBox(height: 16),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: List.generate(3, (i) {
+            final idx = i + 3;
+            final isSelected = selectedIndex == idx;
+            double imgSize = (idx == 3 || idx == 4 || idx == 5) ? 64 : 54; // Sleepy, Stressed & Loved bigger
+            return GestureDetector(
+              onTap: () => _onTap(idx),
+              child: AnimatedBuilder(
+                animation: _controller,
+                child: Image.asset(
+                  'assets/icons/' + moodImages[idx],
+                  width: imgSize,
+                  height: imgSize,
+                  fit: BoxFit.contain,
+                ),
+                builder: (context, child) {
+                  double scale = isSelected ? _scaleAnim.value : 1.0;
+                  double opacity = (selectedIndex == null || isSelected) ? 1.0 : 0.85;
+                  return Opacity(
+                    opacity: opacity,
+                    child: Transform.scale(
+                      scale: scale,
+                      child: child,
+                    ),
+                  );
+                },
+              ),
+            );
+          }),
+        ),
+      ],
     );
   }
 }

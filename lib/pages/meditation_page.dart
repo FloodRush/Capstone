@@ -1201,9 +1201,9 @@ class _MeditationPageState extends State<MeditationPage> with SingleTickerProvid
               child: Text(
                 countdownText,
                 style: TextStyle(
-                  fontSize: 16,
-                  color: Colors.black54,
-                  fontWeight: FontWeight.w500,
+                  fontSize: 22,
+                  color: Colors.black,
+                  fontWeight: FontWeight.bold,
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -1297,6 +1297,7 @@ class _MeditationPageState extends State<MeditationPage> with SingleTickerProvid
                       setState(() {
                         timer?.cancel();
                         sessionStarted = false;
+                        _saveElapsedMinutes();
                       });
                     },
                     tooltip: "Pause",
@@ -1317,6 +1318,7 @@ class _MeditationPageState extends State<MeditationPage> with SingleTickerProvid
                         countdownText = "";
                         breathPhase = "Inhale";
                         phaseCounter = 0;
+                        _saveElapsedMinutes();
                       });
                     },
                     tooltip: "End Session",
@@ -1329,6 +1331,14 @@ class _MeditationPageState extends State<MeditationPage> with SingleTickerProvid
         ],
       ),
     );
+  }
+
+  void _saveElapsedMinutes() {
+    int elapsedSeconds = selectedSession!.durationSeconds - remainingSeconds;
+    int elapsedMinutes = (elapsedSeconds / 60).floor();
+    if (elapsedMinutes > 0) {
+      _updateStats(elapsedMinutes);
+    }
   }
 }
 

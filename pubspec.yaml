@@ -91,6 +91,13 @@ flutter:
     - assets/card/meditationCard.png
     - assets/card/goalCard.png
     - assets/card/motivationCard.png
+    - assets/icons/sad.png
+    - assets/icons/happy.png
+    - assets/icons/sleepy.png
+    - assets/icons/angry.png
+    - assets/icons/stressed.png
+    - assets/icons/loved.png
+   
 
   # To add assets to your application, add an assets section, like this:
   # assets:
