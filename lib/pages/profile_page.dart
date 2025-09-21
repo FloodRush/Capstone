@@ -15,23 +15,54 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<void> editField(String field) async {
     String newValue = "";
+    TextEditingController controller = TextEditingController();
+
     await showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-              backgroundColor: Colors.grey[900],
-              title: Text(
-                "Edit $field",
-                style: const TextStyle(color: Colors.white),
-              ),
-              content: TextField(
-                autofocus: true,
-                style: const TextStyle(color: Colors.white),
-                decoration: InputDecoration(
-                  hintText: "Enter new $field",
-                  hintStyle: TextStyle(color: Colors.grey),
-                ),
-              ),
-            ));
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.grey[900],
+        title: Text(
+          "Edit $field",
+          style: const TextStyle(color: Colors.white),
+        ),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          style: const TextStyle(color: Colors.white),
+          decoration: InputDecoration(
+            hintText: "Enter new $field",
+            hintStyle: TextStyle(color: Colors.grey),
+          ),
+        ),
+        actions: [
+          // cancel button
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text(
+              "Cancel",
+              style: TextStyle(color: Colors.white),
+            ),
+          ),
+          // save button
+          TextButton(
+            onPressed: () async {
+              newValue = controller.text.trim();
+              if (newValue.isNotEmpty) {
+                await FirebaseFirestore.instance
+                    .collection("Users")
+                    .doc(currentUser.email)
+                    .update({field: newValue});
+              }
+              Navigator.pop(context); // close dialog
+            },
+            child: const Text(
+              "Save",
+              style: TextStyle(color: Colors.blue),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   @override

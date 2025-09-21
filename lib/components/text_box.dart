@@ -5,6 +5,7 @@ class MyTextBox extends StatelessWidget {
   final String text;
   final String sectionName;
   final void Function()? onPressed;
+
   const MyTextBox({
     super.key,
     required this.text,
@@ -35,9 +36,9 @@ class MyTextBox extends StatelessWidget {
                 style: TextStyle(color: Colors.black),
               ),
 
-              //edit button
+              // edit button
               IconButton(
-                onPressed: () {},
+                onPressed: onPressed, // Pass the onPressed function here
                 icon: Icon(Icons.settings),
               ),
             ],
