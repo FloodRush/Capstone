@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
 import '../pages/Create_Account.dart';
+import 'package:project/theme.dart';
+
 class JournalPage extends StatefulWidget {
   const JournalPage({super.key});
 
@@ -50,7 +52,11 @@ class _UIState extends State<JournalPage> {
 
     FirebaseFirestore.instance
         .collection("Entries")
+        .where('uid', isEqualTo: userInstance.currentUser!.uid)
+        .get();
         //.doc(userInstance.currentUser!.uid)
+   FirebaseFirestore.instance
+        .collection("Entries")
         .add({
       //database.doc(userInstance.currentUser!.uid).update({
       'date': dateController.text.trim(),
@@ -181,26 +187,39 @@ class _UIState extends State<JournalPage> {
         title: Text("Journal"),
         centerTitle: true,
       ),
-      backgroundColor: Colors.pink[200],
-      body: Row(
+  body: Container(
+    decoration: BoxDecoration(
+      gradient: LinearGradient(
+            colors: [
+              Color.fromARGB(255, 231, 125, 160),
+              AppColors.hotPink,
+              Color.fromARGB(255, 247, 199, 215),
+            ],
+          ),
+        ),
+      child: Row(
         children: [
           Align(
             alignment: Alignment.centerLeft,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                ElevatedButton(onPressed: add, child: Text('ADD')),
-                ElevatedButton(
-                  onPressed: () => delete(nameController.text),
-                  child: Text('DELETE'),
+                //IconButton(
+                GestureDetector(onTap: add,
+                child: Image.asset('assets/icons/add_icon.png', width: 60, height: 60),
+                  //),
                 ),
-                ElevatedButton(
-                  onPressed: () => update(nameController.text),
-                  child: Text('UPDATE'),
+                IconButton(
+                onPressed: () => delete(nameController.text),
+                icon: Image.asset('assets/icons/delete_icon.png', width: 60, height: 60),
                 ),
-                ElevatedButton(
+                IconButton(
+                onPressed: () => update(nameController.text),
+                icon: Image.asset('assets/icons/edit_icon.png', width: 60, height: 60),
+                ),
+                IconButton(
                   onPressed: () => view(nameController.text),
-                  child: Text('VIEW'),
+                  icon: Image.asset('assets/icons/view_icon.png', width: 60, height: 60),
                 ),
               ],
             ),
@@ -208,7 +227,7 @@ class _UIState extends State<JournalPage> {
           Expanded(
             child: Center(
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   GestureDetector(
                     onTap: () {
@@ -241,7 +260,7 @@ class _UIState extends State<JournalPage> {
                             controller: dateController,
                             decoration: InputDecoration(
                               border: OutlineInputBorder(),
-                              hintText: 'Input',
+                              hintText: 'Date',
                               contentPadding:
                                   EdgeInsets.symmetric(horizontal: 10.0),
                             ),
@@ -277,14 +296,15 @@ class _UIState extends State<JournalPage> {
                         hintText: 'How are you feeling?',
                         contentPadding:
                             EdgeInsets.symmetric(horizontal: 10.0),
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
