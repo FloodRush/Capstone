@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:project/theme.dart';
 import '../transition.dart';
 import 'journal_page.dart';
+import 'journal_list_page.dart';
 import 'meditation_page.dart';
 import 'goal_page.dart';
 import 'motivation_page.dart';
@@ -26,6 +27,13 @@ class _HomePageState extends State<HomePage> {
   int _currentExploreIndex = 0;
   Timer? _autoScrollTimer;
   int _scrollSpeed = 1; // Default speed multiplier
+  int _selectedIndex = 0;
+
+  final List<Widget> _pages = [
+    // ...other pages...
+    JournalListPage(), // Use JournalListPage instead of JournalPage
+    // ...other pages...
+  ];
 
   @override
   void initState() {

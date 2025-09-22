@@ -6,19 +6,23 @@ import '../pages/Create_Account.dart';
 import 'package:project/theme.dart';
 
 class JournalPage extends StatefulWidget {
-  const JournalPage({super.key});
+  final String? initialTitle;
+  final String? initialDate;
+  final String? initialEntry;
+  final void Function(String title, String date, String entry)? onSave;
+
+  const JournalPage({
+    super.key,
+    this.initialTitle,
+    this.initialDate,
+    this.initialEntry,
+    this.onSave,
+  });
 
   @override
   State<JournalPage> createState() => _UIState();
 }
-//for id authentification
-//Future<void> currentUser(var user)
-//{
 
-//}
-//retrieving ids
-//Stream<QuerySnapshot> getUser()
-//{
 class _UIState extends State<JournalPage> {
   final List<String> entry = [];
   final List<String> name = [];
@@ -27,7 +31,6 @@ class _UIState extends State<JournalPage> {
   final dateController = TextEditingController();
   final nameController = TextEditingController();
   final entryController = TextEditingController();
-  //final deleteController = TextEditingController();
   DateTime startDate = DateTime(2025, 5, 7);
 
   final userInstance = FirebaseAuth.instance;
@@ -41,29 +44,34 @@ class _UIState extends State<JournalPage> {
     if (user == null) {
       print("This user does not exist");
     }
+    // Pre-fill fields if editing
+    if (widget.initialTitle != null) nameController.text = widget.initialTitle!;
+    if (widget.initialDate != null) dateController.text = widget.initialDate!;
+    if (widget.initialEntry != null) entryController.text = widget.initialEntry!;
   }
 
   void add() {
+    if (widget.onSave != null) {
+      // Editing: only call the callback, do not add a new entry
+      widget.onSave!(nameController.text.trim(), dateController.text.trim(), entryController.text.trim());
+      Navigator.pop(context);
+      return;
+    }
+    // Adding: create a new entry in Firestore
     setState(() {
       date.add(dateController.text.trim());
       name.add(nameController.text.trim());
       entry.add(entryController.text.trim());
     });
-
     FirebaseFirestore.instance
         .collection("Entries")
-        .where('uid', isEqualTo: userInstance.currentUser!.uid)
-        .get();
-        //.doc(userInstance.currentUser!.uid)
-   FirebaseFirestore.instance
-        .collection("Entries")
         .add({
-      //database.doc(userInstance.currentUser!.uid).update({
       'date': dateController.text.trim(),
       'name': nameController.text.trim(),
       'entry': entryController.text.trim(),
       'uid': userInstance.currentUser!.uid
     });
+    Navigator.pop(context); // Always go back to JournalListPage after saving
   }
 
   void delete(String deleted) {
@@ -182,136 +190,224 @@ class _UIState extends State<JournalPage> {
 
   @override
   Widget build(BuildContext context) {
+    int _currentIndex = 1;
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Journal"),
-        centerTitle: true,
-      ),
-  body: Container(
-    decoration: BoxDecoration(
-      gradient: LinearGradient(
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
             colors: [
-              Color.fromARGB(255, 231, 125, 160),
-              AppColors.hotPink,
-              Color.fromARGB(255, 247, 199, 215),
+              Color(0xFFE7BDF0),
+              Color(0xFFF7C7D7),
+              Color(0xFFD6EAF8),
             ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
         ),
-      child: Row(
-        children: [
-          Align(
-            alignment: Alignment.centerLeft,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                //IconButton(
-                GestureDetector(onTap: add,
-                child: Image.asset('assets/icons/add_icon.png', width: 60, height: 60),
-                  //),
-                ),
-                IconButton(
-                onPressed: () => delete(nameController.text),
-                icon: Image.asset('assets/icons/delete_icon.png', width: 60, height: 60),
-                ),
-                IconButton(
-                onPressed: () => update(nameController.text),
-                icon: Image.asset('assets/icons/edit_icon.png', width: 60, height: 60),
-                ),
-                IconButton(
-                  onPressed: () => view(nameController.text),
-                  icon: Image.asset('assets/icons/view_icon.png', width: 60, height: 60),
-                ),
-              ],
-            ),
-          ),
-          Expanded(
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
+        child: SafeArea(
+          child: Column(
+            children: [
+              SizedBox(height: 32),
+              Row(
                 children: [
-                    Column(
-                      children: [
-                        Text('Date'),
-                        SizedBox(
-                          height: 30,
-                          width: 300,
-                          child: TextField(
-                          controller: dateController,
-                          readOnly: true,
-                          onTap: () {
-                            showCupertinoModalPopup(
-                              context: context,
-                              builder: (context) => SizedBox(
-                              height: 300,
-                              child: Align(
-                              alignment: Alignment.center,
-                              child: SizedBox(
-                                height: 400,
-                              child: Opacity(
-                                opacity: 0.5,
-                              child: CupertinoDatePicker(
-                              initialDateTime: startDate,
-                              backgroundColor: Colors.white,                              
-                              onDateTimeChanged: (DateTime date) {
-                                setState(() {
-                                  startDate = date;
-                                  dateController.text =
-                                  "${date.year}/${date.month}/${date.day}";
-                                });
-                              },
-                            use24hFormat: true,
-                            mode: CupertinoDatePickerMode.date,
-                          ),
+                  IconButton(
+                    icon: Icon(Icons.arrow_back),
+                    onPressed: () => Navigator.pop(context),
+                  ),
+                  Expanded(
+                    child: Center(
+                      child: Text(
+                        "Journal",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 28,
+                          color: Colors.black,
                         ),
-                              ),
-                        ),
-                      ),
-                    );
-                  },
-                            decoration: InputDecoration(
-                              border: OutlineInputBorder(),
-                              hintText: 'Date',
-                              contentPadding:
-                                  EdgeInsets.symmetric(horizontal: 10.0),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  //),
-                  SizedBox(height: 20),
-                  Text('Name'),
-                  SizedBox(
-                    height: 30,
-                    width: 300,
-                    child: TextField(
-                      controller: nameController,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        hintText: 'Name',
-                        contentPadding:
-                            EdgeInsets.symmetric(horizontal: 10.0),
                       ),
                     ),
                   ),
-                  SizedBox(height: 20),
-                  Text('Entry'),
-                  SizedBox(
-                    height: 30,
-                    width: 300,
-                    child: TextField(
-                      controller: entryController,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(),
-                        hintText: 'How are you feeling?',
-                        contentPadding:
-                            EdgeInsets.symmetric(horizontal: 10.0),
+                  SizedBox(width: 48), // For symmetry
+                ],
+              ),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                          margin: EdgeInsets.only(bottom: 18),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(22),
+                            boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 12, offset: Offset(0, 2))],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Date', style: TextStyle(fontWeight: FontWeight.w500)),
+                              SizedBox(height: 8),
+                              TextField(
+                                controller: dateController,
+                                readOnly: true,
+                                onTap: () {
+                                  showCupertinoModalPopup(
+                                    context: context,
+                                    builder: (context) => SizedBox(
+                                      height: 300,
+                                      child: Align(
+                                        alignment: Alignment.center,
+                                        child: SizedBox(
+                                          height: 400,
+                                          child: Opacity(
+                                            opacity: 0.95, // Increased from 0.5 for better visibility
+                                            child: CupertinoDatePicker(
+                                              initialDateTime: startDate,
+                                              backgroundColor: Colors.white,
+                                              onDateTimeChanged: (DateTime date) {
+                                                setState(() {
+                                                  startDate = date;
+                                                  dateController.text = "${date.year}/${date.month}/${date.day}";
+                                                });
+                                              },
+                                              use24hFormat: true,
+                                              mode: CupertinoDatePickerMode.date,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
+                                decoration: InputDecoration(
+                                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                                  hintText: 'Date',
+                                  contentPadding: EdgeInsets.symmetric(horizontal: 10.0),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                          margin: EdgeInsets.only(bottom: 18),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(22),
+                            boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 12, offset: Offset(0, 2))],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Title', style: TextStyle(fontWeight: FontWeight.w500)),
+                              SizedBox(height: 8),
+                              TextField(
+                                controller: nameController,
+                                decoration: InputDecoration(
+                                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                                  hintText: 'Title',
+                                  contentPadding: EdgeInsets.symmetric(horizontal: 10.0),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Container(
+                          height: 280, // Increased height for the whole Entry box
+                          padding: EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                          margin: EdgeInsets.only(bottom: 18),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(22),
+                            boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 12, offset: Offset(0, 2))],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Entry', style: TextStyle(fontWeight: FontWeight.w500)),
+                              SizedBox(height: 8),
+                              Expanded(
+                                child: TextField(
+                                  controller: entryController,
+                                  maxLines: 10, // Input starts from the top
+                                  decoration: InputDecoration(
+                                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                                    hintText: 'How are you feeling?',
+                                    contentPadding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 12.0),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: 18),
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.hotPink,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                            elevation: 2,
+                            padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                          ),
+                          onPressed: add,
+                          child: Text('Save Entry', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500)),
+                        ),
+                      ],
                     ),
-                  ],
+                  ),
                 ),
               ),
+            ],
+          ),
+        ),
+      ),
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: AppColors.lightPink,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black12,
+              blurRadius: 8,
+              offset: Offset(0, -2),
+            ),
+          ],
+        ),
+        child: BottomNavigationBar(
+          type: BottomNavigationBarType.fixed,
+          currentIndex: _currentIndex,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          selectedItemColor: AppColors.darkPink,
+          unselectedItemColor: const Color.fromARGB(255, 21, 21, 21),
+          onTap: (index) {
+            if (index == 0) Navigator.pushReplacementNamed(context, '/home');
+            if (index == 1) Navigator.pushReplacementNamed(context, '/journal');
+            if (index == 2) Navigator.pushReplacementNamed(context, '/goals');
+            if (index == 3) Navigator.pushReplacementNamed(context, '/quotes');
+            if (index == 4) Navigator.pushReplacementNamed(context, '/meditate');
+          },
+          items: [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home),
+              label: "Home",
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.book),
+              label: "Journal",
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.flag),
+              label: "Goals",
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.format_quote),
+              label: "Quotes",
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.self_improvement),
+              label: "Meditate",
             ),
           ],
         ),

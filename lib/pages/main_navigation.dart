@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:project/theme.dart';
 import 'home_page.dart';
-import 'journal_page.dart';
+import 'journal_list_page.dart';
 import 'meditation_page.dart';
 import 'goal_tracking_page.dart';
 import 'motivation_page.dart';
@@ -20,7 +20,7 @@ class _MainNavigationState extends State<MainNavigation> {
 
   final pages = [
     HomePage(),
-    JournalPage(),
+    JournalListPage(), // Show JournalListPage instead of JournalPage
     MyGoalPage(),
     MotivationPage(),
     MeditationPage(),
