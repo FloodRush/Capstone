@@ -706,12 +706,25 @@ class _MeditationPageState extends State<MeditationPage> with SingleTickerProvid
       builder: (context, themeProvider, child) {
         return Scaffold(
           appBar: AppBar(
-            title: Text('Meditation', style: TextStyle(color: Colors.white)),
-            backgroundColor: themeProvider.isDarkMode ? AppColors.mediumPurple : AppColors.hotPink,
-            leading: IconButton(
-              icon: Icon(Icons.arrow_back, color: Colors.white),
-              onPressed: () => Navigator.pop(context),
+            title: const Text(
+              'Meditation',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 26,
+                fontWeight: FontWeight.w900,
+                letterSpacing: 1.2,
+                shadows: [
+                  Shadow(
+                    offset: Offset(0, 2),
+                    blurRadius: 4,
+                    color: Colors.black26,
+                  ),
+                ],
+              ),
             ),
+            centerTitle: true,
+            backgroundColor: themeProvider.isDarkMode ? AppColors.mediumPurple : AppColors.hotPink,
+            automaticallyImplyLeading: false,
           ),
           backgroundColor: themeProvider.isDarkMode
               ? AppColors.darkPurple
@@ -786,29 +799,38 @@ class _MeditationPageState extends State<MeditationPage> with SingleTickerProvid
       }
     }
 
+  // Dark mode colors
+  final Color darkBg = Color(0xFF181A2A);
+  final Color cardBg = Color(0xFF23254A);
+  final Color accentPurple = Color(0xFF513682); // deeper purple
+  final Color lightText = Colors.white;
+  final Color mutedText = Color(0xFFBFC2D5);
+  final Color selectedCard = accentPurple;
+  final Color selectedTag = Color(0xFF6A4CA2); // muted tag purple
+  // Day mode original colors
+  final Color dayBg = Colors.white;
+  final Color dayIllustrationCard = Color(0xFFFFD6E0); // soft pink for illustration card
+  final Color dayCard = Colors.white;
+  final Color daySelectedCard = Color(0xFFFFD6E0); // match app background
+  final Color dayText = Colors.black;
+  final Color dayMutedText = Colors.black54;
+  final Color dayTag = Color(0xFFF8BBD0); // light pink tag
+  final Color dayDescIcon = Color(0xFFFF8AB6); // pink icon
+
     return Container(
-      color: Colors.white,
+  color: themeProvider.isDarkMode ? darkBg : dayBg,
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const SizedBox(height: 18),
-            Text(
-              "Meditation",
-              style: TextStyle(
-                fontSize: 30,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
-            ),
-            const SizedBox(height: 18),
-            Container(
-              margin: const EdgeInsets.symmetric(horizontal: 24),
-              decoration: BoxDecoration(
-                color: Color(0xFFFDF2F8),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Center(
+            Center(
+              child: Container(
+                margin: const EdgeInsets.symmetric(horizontal: 12),
+                decoration: BoxDecoration(
+                  color: themeProvider.isDarkMode ? cardBg : dayIllustrationCard,
+                  borderRadius: BorderRadius.circular(24),
+                ),
                 child: Container(
                   height: 180,
                   width: 180,
@@ -822,7 +844,7 @@ class _MeditationPageState extends State<MeditationPage> with SingleTickerProvid
             ),
             const SizedBox(height: 24),
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 18),
+              padding: const EdgeInsets.symmetric(horizontal: 8),
               child: GridView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
@@ -859,16 +881,20 @@ class _MeditationPageState extends State<MeditationPage> with SingleTickerProvid
                     child: Container(
                       padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
-                        color: isSelected ? Color(0xFFFF8AB6) : Colors.white,
+                        color: themeProvider.isDarkMode
+                            ? (isSelected ? selectedCard : cardBg)
+                            : (isSelected ? daySelectedCard : dayCard),
                         borderRadius: BorderRadius.circular(18),
                         boxShadow: [
                           BoxShadow(
-                            color: isSelected ? Color(0xFFFF8AB6).withOpacity(0.18) : Colors.black12,
+                            color: Colors.black.withOpacity(0.18),
                             blurRadius: 8,
                             offset: Offset(0, 4),
                           ),
                         ],
-                        border: isSelected ? Border.all(color: Color(0xFFFF8AB6), width: 2) : null,
+                        border: isSelected
+                            ? Border.all(color: themeProvider.isDarkMode ? accentPurple : daySelectedCard, width: 2)
+                            : null,
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -880,17 +906,17 @@ class _MeditationPageState extends State<MeditationPage> with SingleTickerProvid
                               Text(
                                 session.name.split(' (')[0],
                                 style: TextStyle(
-                                  fontSize: 18,
+                                  color: themeProvider.isDarkMode ? lightText : dayText,
                                   fontWeight: FontWeight.bold,
-                                  color: isSelected ? Colors.white : Colors.black,
+                                  fontSize: 18,
                                 ),
                               ),
                               const SizedBox(height: 4),
                               Text(
                                 "${session.durationSeconds ~/ 60} min",
                                 style: TextStyle(
+                                  color: themeProvider.isDarkMode ? lightText.withOpacity(0.7) : dayMutedText,
                                   fontSize: 16,
-                                  color: isSelected ? Colors.white.withOpacity(0.7) : Colors.black54,
                                 ),
                               ),
                             ],
@@ -898,7 +924,9 @@ class _MeditationPageState extends State<MeditationPage> with SingleTickerProvid
                           Container(
                             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
                             decoration: BoxDecoration(
-                              color: isSelected ? Color(0xFFFEC5E5) : Colors.grey.withOpacity(0.1),
+                              color: themeProvider.isDarkMode
+                                  ? (isSelected ? selectedTag : mutedText.withOpacity(0.1))
+                                  : dayTag,
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Text(
@@ -906,7 +934,7 @@ class _MeditationPageState extends State<MeditationPage> with SingleTickerProvid
                               style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w500,
-                                color: isSelected ? Colors.white : Colors.black87,
+                                color: themeProvider.isDarkMode ? lightText : dayText,
                               ),
                             ),
                           ),
@@ -923,13 +951,12 @@ class _MeditationPageState extends State<MeditationPage> with SingleTickerProvid
                 margin: const EdgeInsets.symmetric(horizontal: 18),
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Color(0xFFFDF2F8),
+                  color: themeProvider.isDarkMode ? cardBg : dayCard,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.grey.shade200),
                 ),
                 child: Row(
                   children: [
-                    Icon(Icons.spa, color: Color(0xFFFF6F91), size: 32),
+                    Icon(Icons.spa, color: themeProvider.isDarkMode ? accentPurple : dayDescIcon, size: 32),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Column(
@@ -940,7 +967,7 @@ class _MeditationPageState extends State<MeditationPage> with SingleTickerProvid
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
-                              color: Colors.black,
+                              color: themeProvider.isDarkMode ? lightText : dayText,
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -948,7 +975,7 @@ class _MeditationPageState extends State<MeditationPage> with SingleTickerProvid
                             sessionDescription,
                             style: TextStyle(
                               fontSize: 13,
-                              color: Colors.grey[700],
+                              color: themeProvider.isDarkMode ? mutedText : dayMutedText,
                             ),
                           ),
                         ],
@@ -969,19 +996,19 @@ class _MeditationPageState extends State<MeditationPage> with SingleTickerProvid
                       });
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Color(0xFFFF8AB6),
+                      backgroundColor: themeProvider.isDarkMode ? accentPurple : daySelectedCard,
                       padding: const EdgeInsets.symmetric(vertical: 16),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(18),
                       ),
                       elevation: 3,
                     ),
-                    child: const Text(
+                    child: Text(
                       "Choose Breathing Pattern",
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        color: themeProvider.isDarkMode ? lightText : Colors.black,
                       ),
                     ),
                   ),
@@ -998,14 +1025,31 @@ class _MeditationPageState extends State<MeditationPage> with SingleTickerProvid
   // Pattern selection UI remains the same
   Widget _buildPatternSelectionUI(ThemeProvider themeProvider) {
     double listHeight = MediaQuery.of(context).size.height * 0.5;
+  final Color darkBg = Color(0xFF181A2A);
+  final Color cardBg = Color(0xFF23254A);
+  final Color accentPurple = Color(0xFF513682); // deep purple
+  final Color lightText = Colors.white;
+  final Color mutedText = Color(0xFFBFC2D5);
+  final Color selectedBorder = accentPurple;
+  final Color buttonBg = accentPurple;
+  // Day mode original colors
+  final Color dayBg = Colors.white;
+  final Color dayCard = Colors.white;
+  final Color daySelectedCard = Color(0xFFFF8AB6); // accent pink
+  final Color dayAccent = Color(0xFFFF8AB6); // pink accent for border
+  final Color daySelectedBorder = Colors.white;
+  final Color dayText = Colors.black;
+  final Color dayMutedText = Colors.black54;
+  final Color dayButtonBg = Color(0xFFFFD6E0); // match app background
+
     return Container(
-      color: Colors.white,
+  color: themeProvider.isDarkMode ? darkBg : dayBg,
       child: Column(
         children: [
           Row(
             children: [
               IconButton(
-                icon: const Icon(Icons.arrow_back),
+                icon: Icon(Icons.arrow_back, color: themeProvider.isDarkMode ? lightText : dayText),
                 onPressed: () {
                   setState(() {
                     patternSelectionMode = false;
@@ -1013,15 +1057,15 @@ class _MeditationPageState extends State<MeditationPage> with SingleTickerProvid
                 },
               ),
               const SizedBox(width: 8),
-              const Text(
+              Text(
                 "Choose Breathing Pattern",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: themeProvider.isDarkMode ? lightText : dayText),
               ),
             ],
           ),
           const SizedBox(height: 20),
           Container(
-            height: listHeight,
+            height: MediaQuery.of(context).size.height * 0.5,
             child: ListView.builder(
               itemCount: breathingPatterns.length,
               itemBuilder: (context, index) {
@@ -1030,12 +1074,18 @@ class _MeditationPageState extends State<MeditationPage> with SingleTickerProvid
                 return Container(
                   margin: const EdgeInsets.only(bottom: 16, left: 12, right: 12),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: themeProvider.isDarkMode
+                        ? cardBg
+                        : dayCard,
                     borderRadius: BorderRadius.circular(16),
-                    border: isSelected ? Border.all(color: Color(0xFFFF8AB6), width: 2) : Border.all(color: Colors.transparent, width: 2),
+                    border: isSelected
+                        ? Border.all(
+                            color: themeProvider.isDarkMode ? selectedBorder : dayAccent, // pink border in day mode
+                            width: 3)
+                        : Border.all(color: Colors.transparent, width: 2),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black12,
+                        color: Colors.black.withOpacity(0.08),
                         blurRadius: 8,
                         offset: Offset(0, 4),
                       ),
@@ -1058,7 +1108,7 @@ class _MeditationPageState extends State<MeditationPage> with SingleTickerProvid
                             style: TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
-                              color: Colors.black,
+                              color: themeProvider.isDarkMode ? lightText : dayText,
                             ),
                           ),
                           const SizedBox(height: 8),
@@ -1066,7 +1116,7 @@ class _MeditationPageState extends State<MeditationPage> with SingleTickerProvid
                             pattern.description,
                             style: TextStyle(
                               fontSize: 14,
-                              color: Colors.grey[700],
+                              color: themeProvider.isDarkMode ? mutedText : dayMutedText,
                             ),
                           ),
                         ],
@@ -1092,20 +1142,20 @@ class _MeditationPageState extends State<MeditationPage> with SingleTickerProvid
                       }
                     : null,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Color(0xFFFF8AB6),
+                  backgroundColor: themeProvider.isDarkMode ? buttonBg : dayButtonBg,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(18),
                   ),
                   elevation: 3,
-                  disabledBackgroundColor: Colors.grey[300],
+                  disabledBackgroundColor: themeProvider.isDarkMode ? Colors.grey[800] : dayMutedText.withOpacity(0.2),
                 ),
-                child: const Text(
+                child: Text(
                   "Begin Session",
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Colors.white,
+                    color: themeProvider.isDarkMode ? lightText : Colors.black,
                   ),
                 ),
               ),
@@ -1133,203 +1183,221 @@ class _MeditationPageState extends State<MeditationPage> with SingleTickerProvid
     }
     // Determine if we should show the countdown message below the card
     bool showCountdownMsg = sessionStarted && (countdownText == "Prepare to breathe" || countdownText.startsWith("Starting"));
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          colors: [Color(0xFFFEC5E5), Color(0xFFD4A7F4)],
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-        ),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const SizedBox(height: 24),
-          Container(
-            margin: const EdgeInsets.symmetric(horizontal: 24),
-            padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 8),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.7),
-              borderRadius: BorderRadius.circular(48),
-              boxShadow: [
-                BoxShadow(
-                  color: Color(0xFFD4A7F4).withOpacity(0.18),
-                  blurRadius: 32,
-                  offset: Offset(0, 12),
-                ),
-              ],
-            ),
-            child: Column(
-              children: [
-                Container(
-                  height: 240,
-                  width: 240,
-                  child: Lottie.asset(
-                    getAnimationForSession(),
-                    fit: BoxFit.contain,
-                    animate: true,
-                  ),
-                ),
-                const SizedBox(height: 18),
-                Text(
-                  breathPhase,
-                  style: TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                // Only show the phase countdown number inside the card
-                if (sessionStarted && breathPhase != "Session Complete" && !showCountdownMsg)
-                  Text(
-                    countdownText,
-                    style: TextStyle(
-                      fontSize: 38,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF9A57E5),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-          // Show small countdown message below card if needed
-          if (showCountdownMsg)
-            Padding(
-              padding: const EdgeInsets.only(top: 12.0),
-              child: Text(
-                countdownText,
-                style: TextStyle(
-                  fontSize: 22,
-                  color: Colors.black,
-                  fontWeight: FontWeight.bold,
-                ),
-                textAlign: TextAlign.center,
+  final Color darkBg = Color(0xFF181A2A);
+  final Color cardBg = Color(0xFF23254A);
+  final Color accentPurple = Color(0xFF513682);
+  final Color lightText = Colors.white;
+  final Color mutedText = Color(0xFFBFC2D5);
+  // Day mode original colors
+  final Color dayBg = Colors.white;
+  final Color dayCard = Colors.white;
+  final Color dayAccent = Color(0xFFFF8AB6); // pink accent
+  final Color dayText = Colors.black;
+  final Color dayMutedText = Colors.black54;
+
+    return Stack(
+      children: [
+        Positioned.fill(
+          child: Align(
+            alignment: Alignment.center,
+            child: Opacity(
+              opacity: 0.35,
+              child: Image.asset(
+                'assets/icons/flower.jpg',
+                fit: BoxFit.contain,
+                width: MediaQuery.of(context).size.width * 0.85,
+                height: MediaQuery.of(context).size.height * 0.85,
               ),
             ),
-          const SizedBox(height: 28),
-          Text(
-            "Find your calm, one breath at a time.",
-            style: TextStyle(
-              fontSize: 20,
-              color: Colors.black54,
-              fontWeight: FontWeight.w500,
-            ),
-            textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 32),
-          Center(
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Container(
-                  width: 180,
-                  height: 180,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    gradient: SweepGradient(
-                      colors: [Color(0xFFFEC5E5), Color(0xFFD4A7F4), Color(0xFFFEC5E5)],
-                      startAngle: 0.0,
-                      endAngle: 2 * pi,
+        ),
+        Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const SizedBox(height: 24),
+            Container(
+              margin: const EdgeInsets.symmetric(horizontal: 24),
+              padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 8),
+              decoration: BoxDecoration(
+                color: themeProvider.isDarkMode ? cardBg : dayCard,
+                borderRadius: BorderRadius.circular(48),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.08),
+                    blurRadius: 32,
+                    offset: Offset(0, 12),
+                  ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  Container(
+                    height: 240,
+                    width: 240,
+                    child: Lottie.asset(
+                      getAnimationForSession(),
+                      fit: BoxFit.contain,
+                      animate: true,
                     ),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Color(0xFFD4A7F4).withOpacity(0.18),
-                        blurRadius: 32,
-                        offset: Offset(0, 12),
-                      ),
-                    ],
                   ),
-                  child: CustomPaint(
-                    painter: _GradientProgressPainter(
-                      progress: remainingSeconds / selectedSession!.durationSeconds,
-                      strokeWidth: 12,
-                      gradientColors: [Color(0xFF9A57E5), Color(0xFFFEC5E5)],
-                      backgroundColor: Colors.transparent,
+                  const SizedBox(height: 18),
+                  Text(
+                    breathPhase,
+                    style: TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      color: themeProvider.isDarkMode ? lightText : dayText,
                     ),
-                    child: Container(),
                   ),
-                ),
-                Container(
-                  width: 160,
-                  height: 160,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Center(
-                    child: Text(
-                      "${(remainingSeconds ~/ 60).toString().padLeft(2, '0')}:${(remainingSeconds % 60).toString().padLeft(2, '0')}",
+                  const SizedBox(height: 8),
+                  // Only show the phase countdown number inside the card
+                  if (sessionStarted && breathPhase != "Session Complete" && !showCountdownMsg)
+                    Text(
+                      countdownText,
                       style: TextStyle(
                         fontSize: 38,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                        letterSpacing: 2,
+                        color: themeProvider.isDarkMode ? accentPurple : dayAccent,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            // Show small countdown message below card if needed
+            if (showCountdownMsg)
+              Padding(
+                padding: const EdgeInsets.only(top: 12.0),
+                child: Text(
+                  countdownText,
+                  style: TextStyle(
+                    fontSize: 22,
+                    color: themeProvider.isDarkMode ? lightText : dayText,
+                    fontWeight: FontWeight.bold,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            const SizedBox(height: 28),
+            Text(
+              "Find your calm, one breath at a time.",
+              style: TextStyle(
+                fontSize: 20,
+                color: themeProvider.isDarkMode ? mutedText : dayMutedText,
+                fontWeight: FontWeight.w500,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 32),
+            Center(
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  SizedBox(
+                    width: 200,
+                    height: 200,
+                    child: CustomPaint(
+                      painter: _GradientProgressPainter(
+                        progress: selectedSession != null && selectedSession!.durationSeconds > 0
+                          ? remainingSeconds / selectedSession!.durationSeconds
+                          : 1.0,
+                        strokeWidth: 14,
+                        gradientColors: [
+                          Color(0xFFFF8AB6),
+                          Color(0xFFFF8AB6),
+                          Color(0xFFFF8AB6),
+                          Color(0xFFFF8AB6),
+                        ],
+                        backgroundColor: Colors.white.withOpacity(0.18),
                       ),
                     ),
                   ),
-                ),
+                  Container(
+                    width: 180,
+                    height: 180,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: themeProvider.isDarkMode ? cardBg : dayCard,
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.08),
+                          blurRadius: 32,
+                          offset: Offset(0, 12),
+                        ),
+                      ],
+                    ),
+                    child: Center(
+                      child: Text(
+                        "${(remainingSeconds ~/ 60).toString().padLeft(2, '0')}:${(remainingSeconds % 60).toString().padLeft(2, '0')}",
+                        style: TextStyle(
+                          fontSize: 38,
+                          fontWeight: FontWeight.bold,
+                          color: themeProvider.isDarkMode ? lightText : dayText,
+                          letterSpacing: 2,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 24),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (!sessionStarted)
+                  CircleAvatar(
+                    radius: 32,
+                    backgroundColor: themeProvider.isDarkMode ? accentPurple : dayAccent,
+                    child: IconButton(
+                      icon: Icon(Icons.play_arrow, color: lightText, size: 32),
+                      onPressed: startSession,
+                      tooltip: "Start",
+                    ),
+                  )
+                else ...[
+                  CircleAvatar(
+                    radius: 32,
+                    backgroundColor: themeProvider.isDarkMode ? accentPurple : dayAccent,
+                    child: IconButton(
+                      icon: Icon(Icons.pause, color: lightText, size: 32),
+                      onPressed: () {
+                        setState(() {
+                          timer?.cancel();
+                          sessionStarted = false;
+                          _saveElapsedMinutes();
+                        });
+                      },
+                      tooltip: "Pause",
+                    ),
+                  ),
+                  const SizedBox(width: 24),
+                  CircleAvatar(
+                    radius: 32,
+                    backgroundColor: themeProvider.isDarkMode ? accentPurple : dayAccent,
+                    child: IconButton(
+                      icon: Icon(Icons.stop, color: lightText, size: 32),
+                      onPressed: () {
+                        setState(() {
+                          sessionReady = false;
+                          sessionStarted = false;
+                          audioPlayer.stop();
+                          timer?.cancel();
+                          countdownText = "";
+                          breathPhase = "Inhale";
+                          phaseCounter = 0;
+                          _saveElapsedMinutes();
+                        });
+                      },
+                      tooltip: "End Session",
+                    ),
+                  ),
+                ],
               ],
             ),
-          ),
-          const SizedBox(height: 24),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (!sessionStarted)
-                CircleAvatar(
-                  radius: 32,
-                  backgroundColor: Color(0xFFFEC5E5),
-                  child: IconButton(
-                    icon: Icon(Icons.play_arrow, color: Colors.white, size: 32),
-                    onPressed: startSession,
-                    tooltip: "Start",
-                  ),
-                )
-              else ...[
-                CircleAvatar(
-                  radius: 32,
-                  backgroundColor: Color(0xFF9A57E5),
-                  child: IconButton(
-                    icon: Icon(Icons.pause, color: Colors.white, size: 32),
-                    onPressed: () {
-                      setState(() {
-                        timer?.cancel();
-                        sessionStarted = false;
-                        _saveElapsedMinutes();
-                      });
-                    },
-                    tooltip: "Pause",
-                  ),
-                ),
-                const SizedBox(width: 24),
-                CircleAvatar(
-                  radius: 32,
-                  backgroundColor: Color(0xFF9A57E5),
-                  child: IconButton(
-                    icon: Icon(Icons.stop, color: Colors.white, size: 32),
-                    onPressed: () {
-                      setState(() {
-                        sessionReady = false;
-                        sessionStarted = false;
-                        audioPlayer.stop();
-                        timer?.cancel();
-                        countdownText = "";
-                        breathPhase = "Inhale";
-                        phaseCounter = 0;
-                        _saveElapsedMinutes();
-                      });
-                    },
-                    tooltip: "End Session",
-                  ),
-                ),
-              ],
-            ],
-          ),
-          const SizedBox(height: 32),
-        ],
-      ),
+            const SizedBox(height: 32),
+          ],
+        ),
+      ],
     );
   }
 
@@ -1380,36 +1448,10 @@ class TrackerPage extends StatelessWidget {
               width: size,
               height: size,
               child: CircularProgressIndicator(
-                value: 1.0,
+                value: percent,
                 strokeWidth: stroke,
                 backgroundColor: Colors.transparent,
-                valueColor: AlwaysStoppedAnimation<Color>(Color(0xFFFDF2F8).withOpacity(0.6)),
-              ),
-            ),
-            SizedBox(
-              width: size,
-              height: size,
-              child: ShaderMask(
-                shaderCallback: (rect) {
-                  return SweepGradient(
-                    colors: [
-                      Color(0xFFFDBBD3),
-                      Color(0xFFFC9BB5),
-                      Color(0xFFE8A7E8),
-                      Color(0xFFD4A7F4),
-                    ],
-                    startAngle: -pi / 2,
-                    endAngle: -pi / 2 + (2 * pi),
-                    stops: [0.0, 0.3, 0.7, 1.0],
-                  ).createShader(rect);
-                },
-                child: CircularProgressIndicator(
-                  value: percent.clamp(0.0, 1.0),
-                  strokeWidth: stroke,
-                  backgroundColor: Colors.transparent,
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                  strokeCap: StrokeCap.round,
-                ),
+                valueColor: AlwaysStoppedAnimation<Color>(appThemeColorAccent.withOpacity(0.6)),
               ),
             ),
             Container(
@@ -1418,8 +1460,8 @@ class TrackerPage extends StatelessWidget {
               decoration: BoxDecoration(
                 gradient: RadialGradient(
                   colors: [
-                    Color(0xFFFDF2F8).withOpacity(0.95),
-                    Color(0xFFFBE7F3).withOpacity(0.85),
+                    Colors.white.withOpacity(0.95),
+                    Colors.white.withOpacity(0.85),
                   ],
                   center: Alignment.center,
                   radius: 0.7,
@@ -1489,7 +1531,9 @@ class TrackerPage extends StatelessWidget {
   }
 
   Widget _weekHeatmap() {
-    final List<String> days = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+  final List<String> days = isDarkMode
+    ? ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+    : ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
     List<Widget> columns = [];
     for (int i = 0; i < 7; i++) {
       DateTime d = DateTime.now().subtract(Duration(days: 6 - i));
@@ -1527,7 +1571,11 @@ class TrackerPage extends StatelessWidget {
         motivations[motivationIndex],
         key: ValueKey<int>(motivationIndex),
         textAlign: TextAlign.center,
-        style: TextStyle(fontSize: 16, color: Colors.black87, fontWeight: FontWeight.w500),
+        style: TextStyle(
+          fontSize: 16,
+          color: isDarkMode ? Colors.white : Colors.black87,
+          fontWeight: FontWeight.w500,
+        ),
       ),
     );
   }
