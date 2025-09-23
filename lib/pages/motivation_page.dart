@@ -5,6 +5,8 @@ import 'package:share_plus/share_plus.dart';
 import 'favorites_page.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'dart:ui';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class MotivationPage extends StatefulWidget {
   const MotivationPage({super.key});
@@ -25,12 +27,53 @@ class _MotivationPageState extends State<MotivationPage> {
   final List<String> _imageUrlCache = [];
   final int _maxCacheSize = 5;
   bool _isFetchingImage = false;
+  String? userId;
 
   @override
   void initState() {
     super.initState();
+    _initializeUser();
     _initializeImageCache();
     fetchQuote();
+  }
+
+  Future<void> _initializeUser() async {
+    User? user = FirebaseAuth.instance.currentUser;
+    userId = user?.uid;
+    if (userId != null) {
+      await _loadFavoritesFromFirestore();
+    }
+  }
+
+  Future<void> _loadFavoritesFromFirestore() async {
+    final doc = await FirebaseFirestore.instance.collection('users').doc(userId).get();
+    if (doc.exists && doc.data()?['favoriteQuotes'] != null) {
+      List<dynamic> favs = doc.data()!['favoriteQuotes'];
+      favoriteQuotes.clear();
+      for (var q in favs) {
+        if (q is Map<String, dynamic>) {
+          favoriteQuotes.add({
+            "text": q["text"] ?? "",
+            "author": q["author"] ?? "Unknown",
+          });
+        }
+      }
+      // Update favorites set based on loaded quotes
+      favorites.clear();
+      for (int i = 0; i < quotes.length; i++) {
+        if (favoriteQuotes.any((fq) => fq["text"] == quotes[i]["text"])) {
+          favorites.add(i);
+        }
+      }
+      setState(() {});
+    }
+  }
+
+  Future<void> _saveFavoritesToFirestore() async {
+    if (userId == null) return;
+    await FirebaseFirestore.instance.collection('users').doc(userId).set({
+      'favoriteQuotes': favoriteQuotes,
+    }, SetOptions(merge: true));
   }
 
   Future<void> _initializeImageCache() async {
@@ -89,10 +132,15 @@ class _MotivationPageState extends State<MotivationPage> {
     );
     if (res.statusCode == 200) {
       final data = json.decode(res.body);
-      quotes.add({
-        "text": data['quote']['body'],
-        "author": data['quote']['author'] ?? "Unknown",
-      });
+      final newQuote = {
+        "text": data['quote']['body']?.toString() ?? "",
+        "author": data['quote']['author']?.toString() ?? "Unknown",
+      };
+      quotes.add(newQuote);
+      // Sync favorites set with Firestore favorites
+      if (favoriteQuotes.any((fq) => fq["text"] == newQuote["text"])) {
+        favorites.add(quotes.length - 1);
+      }
       setState(() {
         currentIndex = quotes.length - 1;
         loading = false;
@@ -139,17 +187,17 @@ class _MotivationPageState extends State<MotivationPage> {
     }
   }
 
-  void toggleFavorite() {
+  void toggleFavorite() async {
     setState(() {
       if (favorites.contains(currentIndex)) {
         favorites.remove(currentIndex);
-        favoriteQuotes
-            .removeWhere((q) => q["text"] == quotes[currentIndex]["text"]);
+        favoriteQuotes.removeWhere((q) => q["text"] == quotes[currentIndex]["text"]);
       } else {
         favorites.add(currentIndex);
         favoriteQuotes.add(quotes[currentIndex]);
       }
     });
+    await _saveFavoritesToFirestore();
   }
 
   void shareQuote() {
@@ -183,17 +231,7 @@ class _MotivationPageState extends State<MotivationPage> {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => FavoritesPage(
-                    favorites: favoriteQuotes,
-                    onRemoveFavorite: (index) {
-                      setState(() {
-                        final removedQuote = favoriteQuotes[index];
-                        favoriteQuotes.removeAt(index);
-                        favorites.removeWhere(
-                            (i) => quotes[i]["text"] == removedQuote["text"]);
-                      });
-                    },
-                  ),
+                  builder: (context) => FavoritesPage(),
                 ),
               );
             },
