@@ -85,6 +85,13 @@ class _JournalListPageState extends State<JournalListPage> {
           child: Column(
             children: [
               SizedBox(height: 8),
+              Align(
+                alignment: Alignment.topLeft,
+                child: IconButton(
+                  icon: Icon(Icons.arrow_back, color: Colors.black),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ),
               Center(
                 child: Text(
                   "Journal",

@@ -42,7 +42,7 @@ class _HomePageState extends State<HomePage> {
       {
         'label': 'Journal',
         'imagePath': 'assets/card/journal.PNG',
-        'page': JournalPage(),
+        'page': JournalListPage(), // Navigate to JournalListPage
         'color': AppColors.lightJournal,
       },
       {
@@ -262,7 +262,9 @@ class _HomePageState extends State<HomePage> {
                           padding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                           height: 210,
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.72), // Slightly lighter background
+                            color: themeProvider.isDarkMode
+                              ? Color(0xFFB7A6DE).withOpacity(0.9) // slightly darker, faded purple
+                              : Colors.white.withOpacity(0.72),
                             borderRadius: BorderRadius.circular(18),
                             boxShadow: [
                               BoxShadow(
@@ -413,17 +415,22 @@ class _HomePageState extends State<HomePage> {
                                         children: [
                                           Text(
                                             card['title'] as String,
-                                            style: const TextStyle(
+                                            style: TextStyle(
                                               fontWeight: FontWeight.w400,
                                               fontSize: 22,
-                                              color: Colors.black,
+                                              color: themeProvider.isDarkMode ? Colors.white : Colors.black,
                                               letterSpacing: 0.2,
                                             ),
                                           ),
                                           const SizedBox(height: 8),
                                           Text(
                                             card['desc'] as String,
-                                            style: const TextStyle(fontSize: 16, color: Colors.black87, fontWeight: FontWeight.w400, letterSpacing: 0.1),
+                                            style: TextStyle(
+                                              fontSize: 16,
+                                              color: themeProvider.isDarkMode ? Colors.white : Colors.black87,
+                                              fontWeight: FontWeight.w400,
+                                              letterSpacing: 0.1,
+                                            ),
                                           ),
                                           const SizedBox(height: 18),
                                           Align(
@@ -436,10 +443,18 @@ class _HomePageState extends State<HomePage> {
                                                 padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
                                                 elevation: 0,
                                               ),
-                                              onPressed: () {
-                                                Navigator.pop(context);
-                                              },
-                                              child: Text(buttonLabels[index], style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w400)),
+                                              onPressed: index == 0
+                                                ? () => Navigator.push(context, MaterialPageRoute(builder: (context) => JournalPage()))
+                                                : index == 1
+                                                  ? () => Navigator.push(context, MaterialPageRoute(builder: (context) => MeditationPage()))
+                                                  : index == 2
+                                                    ? () => Navigator.push(context, MaterialPageRoute(builder: (context) => GoalPage()))
+                                                    : index == 3
+                                                      ? () => Navigator.push(context, MaterialPageRoute(builder: (context) => MotivationPage()))
+                                                      : () {
+                                                          Navigator.pop(context);
+                                                        },
+                                              child: Text(buttonLabels[index], style: TextStyle(fontSize: 15, fontWeight: FontWeight.w400, color: themeProvider.isDarkMode ? Colors.black : Colors.black)),
                                             ),
                                           ),
                                         ],
