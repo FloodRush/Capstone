@@ -252,34 +252,22 @@ class _UIState extends State<JournalPage> {
                               TextField(
                                 controller: dateController,
                                 readOnly: true,
-                                onTap: () {
-                                  showCupertinoModalPopup(
-                                    context: context,
-                                    builder: (context) => SizedBox(
-                                      height: 300,
-                                      child: Align(
-                                        alignment: Alignment.center,
-                                        child: SizedBox(
-                                          height: 400,
-                                          child: Opacity(
-                                            opacity: 0.95, // Increased from 0.5 for better visibility
-                                            child: CupertinoDatePicker(
-                                              initialDateTime: startDate,
-                                              backgroundColor: Colors.white,
-                                              onDateTimeChanged: (DateTime date) {
-                                                setState(() {
-                                                  startDate = date;
-                                                  dateController.text = "${date.year}/${date.month}/${date.day}";
-                                                });
-                                              },
-                                              use24hFormat: true,
-                                              mode: CupertinoDatePickerMode.date,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  );
+                                keyboardType: TextInputType.datetime,
+                                onTap: () async {
+                                final DateTime? pickedDate = await showDatePicker(
+                                  context: context,
+                                  initialDate: startDate,
+                                  firstDate: DateTime(2025),
+                                  lastDate: DateTime(2100),
+                                );
+
+                                if (pickedDate != null) {
+                                  setState(() {
+                                    startDate = pickedDate;
+                                    dateController.text =
+                                        "${pickedDate.year}/${pickedDate.month}/${pickedDate.day}";
+                                  });
+                                }
                                 },
                                 decoration: InputDecoration(
                                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
@@ -331,7 +319,7 @@ class _UIState extends State<JournalPage> {
                               Expanded(
                                 child: TextField(
                                   controller: entryController,
-                                  maxLines: 10, // Input starts from the top
+                                  maxLines: 30, // Input starts from the top
                                   decoration: InputDecoration(
                                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
                                     hintText: 'How are you feeling?',
