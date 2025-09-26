@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:project/theme.dart';
+import 'package:project/providers/theme_provider.dart';
+import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:fl_chart/fl_chart.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:timezone/timezone.dart' as tz;
-import 'package:timezone/data/latest_all.dart' as tz;
 
 class MoodTrackerPage extends StatefulWidget {
   const MoodTrackerPage({super.key});
@@ -22,103 +20,52 @@ class _MoodTrackerPageState extends State<MoodTrackerPage> {
     'Happy', 'Sad', 'Angry', 'Excited', 'Calm', 'Anxious', 'Tired', 'Grateful'
   ];
 
-  final Map<String, int> emotionValues = {
-    'Happy': 2,
+  Map<String, bool> _checkedActivities = {};
+
+  final Map<String, int> moodActivities = {
+    'Happy': 1,
+    'Sad': -1,
+    'Angry': -3,
     'Excited': 2,
     'Calm': 1,
-    'Grateful': 2,
-    'Sad': -2,
-    'Angry': -3,
     'Anxious': -2,
     'Tired': -1,
+    'Grateful': 2,
   };
 
-  final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-      FlutterLocalNotificationsPlugin();
+  List<String> allActivities = [
+    'Journal',
+    'Meditate',
+    'Get Inspired',
+    'Check Your Goals',
+  ];
 
-  @override
-  void initState() {
-    super.initState();
-    _initializeNotifications();
-    _scheduleMoodReminder();
-  }
+  List<String> currentActivities = [];
+  Map<String, bool> checked = {};
 
-  Future<void> _initializeNotifications() async {
-    tz.initializeTimeZones();
-
-    const AndroidInitializationSettings androidSettings =
-        AndroidInitializationSettings('@mipmap/ic_launcher');
-
-    const InitializationSettings settings = InitializationSettings(
-      android: androidSettings,
-    );
-
-    await flutterLocalNotificationsPlugin.initialize(settings);
-  }
-
-  Future<void> _scheduleMoodReminder() async {
-    final today = DateTime.now();
-    final utcToday = DateTime.utc(today.year, today.month, today.day);
-    final hasEntry = _moodEntries.containsKey(utcToday);
-
-    if (hasEntry) {
-      // Cancel existing reminder
-      await flutterLocalNotificationsPlugin.cancel(0);
-    } else {
-      // Schedule notification at 8 PM
-      final tz.TZDateTime now = tz.TZDateTime.now(tz.local);
-      tz.TZDateTime scheduledTime =
-          tz.TZDateTime(tz.local, now.year, now.month, now.day, 20, 0);
-
-      if (scheduledTime.isBefore(now)) {
-        scheduledTime = scheduledTime.add(const Duration(days: 1));
+  void updateActivities(int score) {
+    setState(() {
+      if (score > 0) {
+        for (int i = 0; i < score; i++) {
+          if (currentActivities.length < allActivities.length) {
+            String activityToAdd = allActivities[currentActivities.length];
+            currentActivities.add(activityToAdd);
+            checked[activityToAdd] = false;
+          }
+        }
+      } else if (score < 0) {
+        for (int i = 0; i < score.abs(); i++) {
+          if (currentActivities.isNotEmpty) {
+            String removedActivity = currentActivities.removeLast();
+            checked.remove(removedActivity);
+          }
+        }
       }
-
-      await flutterLocalNotificationsPlugin.zonedSchedule(
-        0,
-        'Mood Check-In',
-        'Don’t forget to record your mood today!',
-        scheduledTime,
-        const NotificationDetails(
-          android: AndroidNotificationDetails(
-            'mood_channel',
-            'Mood Reminders',
-            importance: Importance.high,
-            priority: Priority.high,
-          ),
-        ),
-        androidAllowWhileIdle: true,
-        uiLocalNotificationDateInterpretation:
-            UILocalNotificationDateInterpretation.absoluteTime,
-        matchDateTimeComponents: DateTimeComponents.time,
-      );
-    }
+    });
   }
 
   List<String> _getMoodsForDay(DateTime day) {
     return _moodEntries[DateTime.utc(day.year, day.month, day.day)] ?? [];
-  }
-
-  int calculateDailyMoodScore(DateTime day) {
-    final moods = _getMoodsForDay(day);
-    int score = 0;
-    for (var mood in moods) {
-      score += emotionValues[mood] ?? 0;
-    }
-    return score;
-  }
-
-  List<FlSpot> getMoodDataPoints() {
-    final List<DateTime> sortedDates = _moodEntries.keys.toList()..sort();
-    List<FlSpot> spots = [];
-
-    for (int i = 0; i < sortedDates.length; i++) {
-      final date = sortedDates[i];
-      final score = calculateDailyMoodScore(date);
-      spots.add(FlSpot(i.toDouble(), score.toDouble()));
-    }
-
-    return spots;
   }
 
   void _selectMoodsForDay(DateTime day) async {
@@ -166,115 +113,154 @@ class _MoodTrackerPageState extends State<MoodTrackerPage> {
 
     if (selectedMoods != null) {
       setState(() {
-        _moodEntries[DateTime.utc(day.year, day.month, day.day)] =
-            selectedMoods;
-      });
+        _moodEntries[DateTime.utc(day.year, day.month, day.day)] = selectedMoods;
+        _checkedActivities.clear();
 
-      // Reschedule/cancel reminder after mood update
-      _scheduleMoodReminder();
+        // Compute recommended activities
+        final activities = <String>{};
+        for (var mood in selectedMoods) {
+          int score = moodActivities[mood] ?? 0;
+          if (score > 0) {
+            for (int i = 0; i < score; i++) {
+              if (activities.length < allActivities.length) {
+                activities.add(allActivities[activities.length]);
+              }
+              if (activities.length >= 4) break;
+            }
+          }
+          if (activities.length >= 4) break;
+        }
+
+        for (var act in activities) {
+          _checkedActivities[act] = false;
+        }
+      });
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final moodSpots = getMoodDataPoints();
-    final sortedDates = _moodEntries.keys.toList()..sort();
+    final themeProvider = Provider.of<ThemeProvider>(context);
+    final selectedMoods = _getMoodsForDay(_selectedDay);
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Mood Tracker'),
         centerTitle: true,
-        backgroundColor: AppColors.lightPink,
+        backgroundColor:
+            themeProvider.isDarkMode ? AppColors.mediumPurple : AppColors.lightPink,
+        foregroundColor: Colors.white,
       ),
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            TableCalendar(
-              firstDay: DateTime.utc(2025, 1, 1),
-              lastDay: DateTime.utc(2030, 12, 31),
-              focusedDay: _focusedDay,
-              selectedDayPredicate: (day) {
-                return isSameDay(_selectedDay, day);
-              },
-              onDaySelected: (selectedDay, focusedDay) {
-                setState(() {
-                  _selectedDay = selectedDay;
-                  _focusedDay = focusedDay;
-                });
-                _selectMoodsForDay(selectedDay);
-              },
-              calendarStyle: CalendarStyle(
-                markerDecoration: BoxDecoration(
-                  color: Colors.pink[200],
-                  shape: BoxShape.circle,
+      body: Column(
+        children: [
+          TableCalendar(
+            firstDay: DateTime.utc(2025, 1, 1),
+            lastDay: DateTime.utc(2030, 12, 31),
+            focusedDay: _focusedDay,
+            selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+            onDaySelected: (selectedDay, focusedDay) {
+              setState(() {
+                _selectedDay = selectedDay;
+                _focusedDay = focusedDay;
+              });
+              _selectMoodsForDay(selectedDay);
+            },
+            calendarStyle: CalendarStyle(
+              markerDecoration: BoxDecoration(
+                color: themeProvider.isDarkMode ? AppColors.accentPurple : Colors.pink[200],
+                shape: BoxShape.circle,
+              ),
+              selectedDecoration: BoxDecoration(
+                color: themeProvider.isDarkMode ? AppColors.accentPurple : AppColors.hotPink,
+                shape: BoxShape.circle,
+              ),
+              todayDecoration: BoxDecoration(
+                color: themeProvider.isDarkMode ? AppColors.lightPurple : AppColors.darkPink,
+                shape: BoxShape.circle,
+              ),
+              defaultTextStyle: TextStyle(
+                color: themeProvider.isDarkMode ? AppColors.darkText : Colors.black,
+              ),
+              weekendTextStyle: TextStyle(
+                color: themeProvider.isDarkMode ? AppColors.darkSecondaryText : Colors.black54,
+              ),
+            ),
+            headerStyle: HeaderStyle(
+              formatButtonTextStyle: TextStyle(
+                color: themeProvider.isDarkMode ? AppColors.darkText : Colors.black,
+              ),
+              titleTextStyle: TextStyle(
+                color: themeProvider.isDarkMode ? AppColors.darkText : Colors.black,
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            eventLoader: (day) => _getMoodsForDay(day),
+          ),
+          /*const SizedBox(height: 16),
+          Text(
+            'Moods on ${_selectedDay.toLocal().toString().split(' ')[0]}:',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: themeProvider.isDarkMode ? AppColors.darkText : Colors.black,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Wrap(
+            spacing: 8,
+            children: selectedMoods
+                .map(
+                  (mood) => Chip(
+                    label: Text(
+                      mood,
+                      style: TextStyle(
+                        color: themeProvider.isDarkMode ? Colors.white : Colors.black87,
+                      ),
+                    ),
+                    backgroundColor:
+                        themeProvider.isDarkMode ? AppColors.mediumPurple : AppColors.lightPink,
+                  ),
+                )
+                .toList(),
+          ),*/
+          const Divider(height: 24),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Recommended Activities',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: themeProvider.isDarkMode ? AppColors.darkText : Colors.black,
                 ),
               ),
-              eventLoader: (day) => _getMoodsForDay(day),
             ),
-            const SizedBox(height: 16),
-            Text(
-              'Moods on ${_selectedDay.toLocal().toString().split(' ')[0]}:',
-              style: const TextStyle(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              children: _getMoodsForDay(_selectedDay)
-                  .map((mood) => Chip(label: Text(mood)))
-                  .toList(),
-            ),
-            const SizedBox(height: 24),
-            if (moodSpots.isNotEmpty)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: SizedBox(
-                  height: 250,
-                  child: LineChart(
-                    LineChartData(
-                      gridData: FlGridData(show: true),
-                      titlesData: FlTitlesData(
-                        bottomTitles: AxisTitles(
-                          sideTitles: SideTitles(
-                            showTitles: true,
-                            interval: 1,
-                            getTitlesWidget: (value, meta) {
-                              final index = value.toInt();
-                              if (index < 0 || index >= sortedDates.length) {
-                                return const SizedBox.shrink();
-                              }
-                              final date = sortedDates[index];
-                              final label = "${date.month}/${date.day}";
-                              return SideTitleWidget(
-                                axisSide: meta.axisSide,
-                                child: Text(label,
-                                    style: const TextStyle(fontSize: 10)),
-                              );
-                            },
-                          ),
-                        ),
-                        leftTitles: AxisTitles(
-                          sideTitles: SideTitles(showTitles: true, interval: 1),
-                        ),
-                      ),
-                      borderData: FlBorderData(show: true),
-                      minY: -6,
-                      maxY: 6,
-                      lineBarsData: [
-                        LineChartBarData(
-                          spots: moodSpots,
-                          isCurved: true,
-                          barWidth: 3,
-                          colors: Colors.pink,
-                          dotData: FlDotData(show: true),
-                        ),
-                      ],
+          ),
+          Expanded(
+            child: ListView(
+              children: _checkedActivities.entries.map((entry) {
+                return CheckboxListTile(
+                  title: Text(
+                    entry.key,
+                    style: TextStyle(
+                      color: themeProvider.isDarkMode ? Colors.white : Colors.black87,
                     ),
                   ),
-                ),
-              ),
-          ],
-        ),
+                  value: entry.value,
+                  onChanged: (bool? val) {
+                    setState(() {
+                      _checkedActivities[entry.key] = val ?? false;
+                    });
+                  },
+                );
+              }).toList(),
+            ),
+          ),
+        ],
       ),
     );
   }
 }
+ 
