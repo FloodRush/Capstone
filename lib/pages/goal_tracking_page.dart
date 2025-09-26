@@ -1,10 +1,6 @@
-// pubspec.yaml:
-// Add this under dependencies:
-// shared_preferences: ^2.0.15
-
-import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 class MyGoalPage extends StatefulWidget {
   @override
@@ -14,8 +10,9 @@ class MyGoalPage extends StatefulWidget {
 class _MyGoalPageState extends State<MyGoalPage> {
   List<Map<String, dynamic>> healthGoals = [];
   List<Map<String, dynamic>> personalGoals = [];
-  String healthLabel = 'Health Goals';
-  String personalLabel = 'Personal Goals';
+
+  String healthTitle = 'HEALTH GOALS';
+  String personalTitle = 'PERSONAL GOALS';
 
   @override
   void initState() {
@@ -25,170 +22,215 @@ class _MyGoalPageState extends State<MyGoalPage> {
 
   Future<void> _loadGoals() async {
     final prefs = await SharedPreferences.getInstance();
+
     setState(() {
-      healthGoals = List<Map<String, dynamic>>.from(
-        jsonDecode(prefs.getString('healthGoals') ?? '[]'),
-      );
-      personalGoals = List<Map<String, dynamic>>.from(
-        jsonDecode(prefs.getString('personalGoals') ?? '[]'),
-      );
-      healthLabel = prefs.getString('healthLabel') ?? 'Health Goals';
-      personalLabel = prefs.getString('personalLabel') ?? 'Personal Goals';
+      healthGoals = prefs.getString('healthGoals') != null
+          ? List<Map<String, dynamic>>.from(
+              json.decode(prefs.getString('healthGoals')!))
+          : [
+              {
+                'label': 'Finish 3 workouts this week',
+                'icon': Icons.flag.codePoint,
+                'progress': 0.66,
+                'done': true
+              },
+              {
+                'label': 'Walk 10,000 steps a day',
+                'icon': Icons.directions_walk.codePoint,
+                'done': false
+              },
+            ];
+
+      personalGoals = prefs.getString('personalGoals') != null
+          ? List<Map<String, dynamic>>.from(
+              json.decode(prefs.getString('personalGoals')!))
+          : [
+              {
+                'label': 'Read 10 pages',
+                'icon': Icons.emoji_events.codePoint,
+                'done': false
+              },
+              {
+                'label': 'Practice gratitude',
+                'icon': Icons.flash_on.codePoint,
+                'due': 'Sep 30',
+                'done': false
+              },
+            ];
     });
   }
 
   Future<void> _saveGoals() async {
     final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('healthGoals', jsonEncode(healthGoals));
-    await prefs.setString('personalGoals', jsonEncode(personalGoals));
-    await prefs.setString('healthLabel', healthLabel);
-    await prefs.setString('personalLabel', personalLabel);
+    await prefs.setString('healthGoals', json.encode(healthGoals));
+    await prefs.setString('personalGoals', json.encode(personalGoals));
   }
 
-  void _toggleGoal(List<Map<String, dynamic>> list, int index) {
+  void _toggleGoal(List<Map<String, dynamic>> goals, int index) {
     setState(() {
-      list[index]['done'] = !list[index]['done'];
-      _saveGoals();
+      goals[index]['done'] = !goals[index]['done'];
     });
+    _saveGoals();
   }
 
-  void _editSectionName(String type) async {
-    String? newName = await showDialog(
+  void _changeSectionName(bool isHealth) {
+    showDialog(
       context: context,
-      builder: (context) {
+      builder: (ctx) {
         TextEditingController controller = TextEditingController(
-            text: type == 'health' ? healthLabel : personalLabel);
+            text: isHealth ? healthTitle : personalTitle);
+
         return AlertDialog(
-          title: Text("Rename $type section"),
+          title: Text("Change Section Title"),
           content: TextField(controller: controller),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context, controller.text),
+              onPressed: () {
+                setState(() {
+                  if (isHealth) {
+                    healthTitle = controller.text;
+                  } else {
+                    personalTitle = controller.text;
+                  }
+                });
+                Navigator.pop(ctx);
+              },
               child: Text("Save"),
-            )
+            ),
           ],
         );
       },
     );
+  }
 
-    if (newName != null && newName.trim().isNotEmpty) {
-      setState(() {
-        if (type == 'health') {
-          healthLabel = newName.trim();
-        } else {
-          personalLabel = newName.trim();
-        }
-        _saveGoals();
-      });
-    }
+  Widget _buildGoalTile(Map<String, dynamic> goal, bool isHealth, int index) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1E1E1E),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(10),
+            decoration: BoxDecoration(
+              color: Colors.pink.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(IconData(goal['icon'], fontFamily: 'MaterialIcons'),
+                color: Colors.pink),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(goal['label'],
+                    style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500)),
+                if (goal.containsKey('progress'))
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: LinearProgressIndicator(
+                      value: goal['progress'],
+                      backgroundColor: Colors.grey[800],
+                      color: Colors.pink,
+                    ),
+                  ),
+                if (goal.containsKey('due'))
+                  Padding(
+                    padding: const EdgeInsets.only(top: 6.0),
+                    child: Text("Due: ${goal['due']}",
+                        style: const TextStyle(
+                            fontSize: 13, color: Colors.grey)),
+                  )
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          IconButton(
+            icon: Icon(
+              goal['done']
+                  ? Icons.check_circle
+                  : Icons.radio_button_unchecked,
+              color: Colors.white,
+            ),
+            onPressed: () =>
+                _toggleGoal(isHealth ? healthGoals : personalGoals, index),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFFFF0F5),
+      backgroundColor: const Color(0xFF121212),
       appBar: AppBar(
-        backgroundColor: Colors.pink,
-        title: Text('Goal Tracking', style: TextStyle(color: Colors.white)),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: const Text('Goal Tracking',
+            style: TextStyle(fontSize: 26, fontWeight: FontWeight.bold)),
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 20),
         child: ListView(
           children: [
-            _buildHeader(healthLabel, 'health'),
-            ...healthGoals.asMap().entries.map(
-              (entry) => _buildTile(entry.value, () => _toggleGoal(healthGoals, entry.key)),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(healthTitle,
+                    style: const TextStyle(
+                        color: Colors.grey,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14)),
+                IconButton(
+                  icon: const Icon(Icons.edit, color: Colors.pink),
+                  onPressed: () => _changeSectionName(true),
+                ),
+              ],
             ),
-            SizedBox(height: 30),
-            _buildHeader(personalLabel, 'personal'),
-            ...personalGoals.asMap().entries.map(
-              (entry) => _buildTile(entry.value, () => _toggleGoal(personalGoals, entry.key)),
+            const SizedBox(height: 12),
+            ...healthGoals
+                .asMap()
+                .entries
+                .map((e) => _buildGoalTile(e.value, true, e.key))
+                .toList(),
+            const SizedBox(height: 30),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(personalTitle,
+                    style: const TextStyle(
+                        color: Colors.grey,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14)),
+                IconButton(
+                  icon: const Icon(Icons.edit, color: Colors.pink),
+                  onPressed: () => _changeSectionName(false),
+                ),
+              ],
             ),
+            const SizedBox(height: 12),
+            ...personalGoals
+                .asMap()
+                .entries
+                .map((e) => _buildGoalTile(e.value, false, e.key))
+                .toList(),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.pink,
-        child: Icon(Icons.add),
-        onPressed: () => _addGoalDialog(),
-      ),
-    );
-  }
-
-  Widget _buildHeader(String label, String type) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(label,
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-        IconButton(
-          icon: Icon(Icons.edit, color: Colors.grey),
-          onPressed: () => _editSectionName(type),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTile(Map<String, dynamic> goal, VoidCallback onToggle) {
-    return ListTile(
-      contentPadding: EdgeInsets.symmetric(vertical: 4),
-      title: Text(goal['label']),
-      trailing: Checkbox(
-        value: goal['done'],
-        onChanged: (_) => onToggle(),
-      ),
-    );
-  }
-
-  void _addGoalDialog() async {
-    String? type;
-    String? label;
-    final controller = TextEditingController();
-
-    await showDialog(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: Text("New Goal"),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            DropdownButton<String>(
-              value: type,
-              isExpanded: true,
-              hint: Text("Select Type"),
-              onChanged: (val) => setState(() => type = val),
-              items: ["health", "personal"]
-                  .map((t) => DropdownMenuItem(value: t, child: Text(t)))
-                  .toList(),
-            ),
-            TextField(
-              controller: controller,
-              decoration: InputDecoration(labelText: "Goal label"),
-            )
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              if (type != null && controller.text.trim().isNotEmpty) {
-                setState(() {
-                  var newGoal = {
-                    'label': controller.text.trim(),
-                    'done': false
-                  };
-                  if (type == 'health') {
-                    healthGoals.add(newGoal);
-                  } else {
-                    personalGoals.add(newGoal);
-                  }
-                  _saveGoals();
-                });
-              }
-            },
-            child: Text("Add"),
-          )
-        ],
+        child: const Icon(Icons.add, size: 30),
+        onPressed: () {
+          // TODO: Add functionality to create custom goals
+        },
       ),
     );
   }
