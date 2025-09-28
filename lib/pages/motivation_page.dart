@@ -281,9 +281,10 @@ class _MotivationPageState extends State<MotivationPage> {
                           const Text(
                             'Motivation',
                             style: TextStyle(
-                              fontSize: 22,
+                              fontSize: 26,
                               fontWeight: FontWeight.w700,
-                              color: Colors.black,
+                              color: Colors.white,
+                              letterSpacing: 0.2,
                             ),
                             textAlign: TextAlign.center,
                           ),
