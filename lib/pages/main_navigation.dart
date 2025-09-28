@@ -24,10 +24,10 @@ class _MainNavigationState extends State<MainNavigation> {
     super.initState();
     pages = [
       const HomePage(),
-      JournalListPage(),
+      JournalListPage(onBackToHome: _goHome),
       MyGoalPage(),
       MotivationPage(),
-      MeditationPage(onBackToHome: _goHome),
+      MeditationPage(onBackToHome: _goHome), // Leave as-is per instructions
     ];
   }
 
