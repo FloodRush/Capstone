@@ -9,10 +9,21 @@ import 'pages/mood_tracker_page.dart';
 import 'package:provider/provider.dart';
 import 'providers/theme_provider.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-
+import 'package:hive_flutter/hive_flutter.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  AwesomeNotifications();.initialize(
+  null,
+  [
+	NotificationChannel(
+		channelKey: 'basic_channel',
+		channelName: 'Basic Notificaitons'
+		channelDescription: 'Notification channel for basic tests',
+		),
+  	],
+	debug: true,
+  );
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -26,6 +37,11 @@ Future<void> main() async {
 }
 
 class MyApp extends StatelessWidget {
+  AwesomeNotifications().isNotificaitonAllowed().then((isAllowed) {
+	if (!isAllowed){
+		AwesomeNotifications().requestPermissionToSendNotifications();
+		}
+	});
   const MyApp({super.key});
 
   @override
