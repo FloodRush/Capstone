@@ -13,7 +13,7 @@ import 'package:awesome_notifications/awesome_notifications.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  AwesomeNotifications();.initialize(
+  AwesomeNotifications().initialize(
   null,
   [
 	NotificationChannel(
