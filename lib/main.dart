@@ -9,7 +9,7 @@ import 'pages/mood_tracker_page.dart';
 import 'package:provider/provider.dart';
 import 'providers/theme_provider.dart';
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:hive_flutter/hive_flutter.dart';
+import 'package:awesome_notifications/awesome_notifications.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
