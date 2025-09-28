@@ -11,6 +11,8 @@ import 'providers/theme_provider.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
 
+
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   AwesomeNotifications().initialize(
@@ -18,12 +20,19 @@ Future<void> main() async {
   [
 	NotificationChannel(
 		channelKey: 'basic_channel',
-		channelName: 'Basic Notificaitons'
+		channelName: 'Basic Notificaitons',
 		channelDescription: 'Notification channel for basic tests',
 		),
   	],
 	debug: true,
   );
+
+  AwesomeNotifications().isNotificationAllowed().then((isAllowed) {
+	if (!isAllowed){
+		AwesomeNotifications().requestPermissionToSendNotifications();
+		}
+	});
+
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -37,11 +46,7 @@ Future<void> main() async {
 }
 
 class MyApp extends StatelessWidget {
-  AwesomeNotifications().isNotificaitonAllowed().then((isAllowed) {
-	if (!isAllowed){
-		AwesomeNotifications().requestPermissionToSendNotifications();
-		}
-	});
+  
   const MyApp({super.key});
 
   @override
