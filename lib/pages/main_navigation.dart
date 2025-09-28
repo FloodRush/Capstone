@@ -26,7 +26,7 @@ class _MainNavigationState extends State<MainNavigation> {
       const HomePage(),
       JournalListPage(onBackToHome: _goHome),
       MyGoalPage(),
-      MotivationPage(),
+      MotivationPage(onBackToHome: _goHome),
       MeditationPage(onBackToHome: _goHome), // Leave as-is per instructions
     ];
   }

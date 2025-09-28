@@ -1,21 +1,43 @@
+import 'package:flutter/scheduler.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:share_plus/share_plus.dart';
-import 'favorites_page.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'dart:ui';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+
+import 'favorites_page.dart';
+
 
 class MotivationPage extends StatefulWidget {
-  const MotivationPage({super.key});
+  final VoidCallback? onBackToHome;
+  const MotivationPage({super.key, this.onBackToHome});
 
   @override
   State<MotivationPage> createState() => _MotivationPageState();
 }
 
 class _MotivationPageState extends State<MotivationPage> {
+  Future<void> _safeOpenFavorites() async {
+    if (!mounted) return;
+    try {
+      SchedulerBinding.instance.addPostFrameCallback((_) async {
+        if (!mounted) return;
+        Navigator.of(context).push(
+          MaterialPageRoute(builder: (_) => const FavoritesPage()),
+        );
+      });
+    } catch (e, st) {
+      debugPrint('Favorites nav error: $e\n$st');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Could not open Favorites: $e')),
+        );
+      }
+    }
+  }
   final String apiKey = '2e6911b429771b543d931408ced6f86c';
   final List<Map<String, String>> quotes = [];
   final Set<int> favorites = {};
@@ -207,74 +229,112 @@ class _MotivationPageState extends State<MotivationPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
+    return WillPopScope(
+      onWillPop: () async {
+        if (Navigator.of(context).canPop()) return true;
+        if (widget.onBackToHome != null) {
+          widget.onBackToHome!();
+          return false;
+        }
+        return true;
+      },
+      child: Scaffold(
         backgroundColor: Colors.transparent,
-        title: const Text(
-          "Daily Motivation",
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 22, // Added larger font size
-          ),
-        ),
-        centerTitle: true,
-        elevation: 0,
-        actions: [
-          IconButton(
-            icon: const Icon(
-              Icons.bookmark,
-              color: Colors.white, // Changed icon color
-              size: 28, // Added larger icon size
-            ),
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => FavoritesPage(),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
-      extendBodyBehindAppBar: true,
-      body: Stack(
-        children: [
-          // Background image
-          if (currentBackgroundUrl != null)
-            Positioned.fill(
-              child: CachedNetworkImage(
-                imageUrl: currentBackgroundUrl!,
-                fit: BoxFit.cover,
-                placeholder: (context, url) => Container(
-                  color: Colors.grey[300],
-                  child: const Center(
-                    child: CircularProgressIndicator(),
+        body: Stack(
+          children: [
+            // --- Background covers the entire screen ---
+            if (currentBackgroundUrl != null)
+              Positioned.fill(
+                child: CachedNetworkImage(
+                  imageUrl: currentBackgroundUrl!,
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) => Container(
+                    color: Colors.grey[300],
+                    child: const Center(child: CircularProgressIndicator()),
                   ),
-                ),
-                errorWidget: (context, url, error) {
-                  print('Error loading image: $error'); // Debug print
-                  return Container(
+                  errorWidget: (context, url, error) => Container(
                     color: Colors.grey[300],
                     child: const Icon(Icons.error),
-                  );
-                },
+                  ),
+                ),
+              ),
+            // Blur + darken overlay
+            Positioned.fill(
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
+                child: Container(color: Colors.black.withOpacity(0.3)),
               ),
             ),
-          // Blur overlay
-          Positioned.fill(
-            child: BackdropFilter(
-              filter: ImageFilter.blur(sigmaX: 3, sigmaY: 3),
-              child: Container(
-                color: Colors.black.withOpacity(0.3),
+            // --- Foreground: header + existing body ---
+            SafeArea(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Header (unchanged behavior)
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(4, 4, 4, 8),
+                    child: SizedBox(
+                      height: 48,
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          const Text(
+                            'Motivation',
+                            style: TextStyle(
+                              fontSize: 22,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.black,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: IconButton(
+                              icon: const Icon(Icons.arrow_back),
+                              onPressed: () {
+                                if (Navigator.of(context).canPop()) {
+                                  Navigator.of(context).pop();
+                                } else if (widget.onBackToHome != null) {
+                                  widget.onBackToHome!();
+                                }
+                              },
+                            ),
+                          ),
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: Builder(
+                              builder: (context) {
+                                final isLight = Theme.of(context).brightness == Brightness.light;
+                                final double iconSize = isLight ? 28.0 : 24.0;
+                                final Color iconColor = Colors.white;
+                                return IconButton(
+                                  tooltip: 'Favorites',
+                                  iconSize: iconSize,
+                                  icon: Icon(Icons.bookmark_border, color: iconColor),
+                                  onPressed: _safeOpenFavorites,
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  // Existing content (use your current builder)
+                  Expanded(
+                    child: Stack(
+                      children: [
+                        // Remove the background/blur from here (now handled above)
+                        if (quotes.isNotEmpty) _buildQuoteContent(),
+                        if (loading) const Center(child: CircularProgressIndicator()),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ),
-          ),
-          // Content
-          if (quotes.isNotEmpty) _buildQuoteContent(),
-          if (loading) const Center(child: CircularProgressIndicator()),
-        ],
+          ],
+        ),
       ),
     );
   }
