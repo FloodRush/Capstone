@@ -17,14 +17,24 @@ class MainNavigation extends StatefulWidget {
 
 class _MainNavigationState extends State<MainNavigation> {
   int _currentIndex = 0;
+  late List<Widget> pages;
 
-  final pages = [
-    HomePage(),
-    JournalListPage(), // Show JournalListPage instead of JournalPage
-    MyGoalPage(),
-    MotivationPage(),
-    MeditationPage(),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    pages = [
+      const HomePage(),
+      JournalListPage(),
+      MyGoalPage(),
+      MotivationPage(),
+      MeditationPage(onBackToHome: _goHome),
+    ];
+  }
+
+  void _goHome() {
+    if (!mounted) return;
+    setState(() => _currentIndex = 0);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,16 +44,14 @@ class _MainNavigationState extends State<MainNavigation> {
           body: pages[_currentIndex],
           bottomNavigationBar: Container(
             decoration: BoxDecoration(
-              color: themeProvider.isDarkMode 
+              color: themeProvider.isDarkMode
                   ? AppColors.mediumPurple
                   : AppColors.lightPink,
               boxShadow: [
                 BoxShadow(
-                  color: themeProvider.isDarkMode 
-                      ? Colors.black26
-                      : Colors.black12,
+                  color: themeProvider.isDarkMode ? Colors.black26 : Colors.black12,
                   blurRadius: 8,
-                  offset: Offset(0, -2),
+                  offset: const Offset(0, -2),
                 ),
               ],
             ),
@@ -52,67 +60,57 @@ class _MainNavigationState extends State<MainNavigation> {
               currentIndex: _currentIndex,
               backgroundColor: Colors.transparent,
               elevation: 0,
-              selectedItemColor: themeProvider.isDarkMode 
+              selectedItemColor: themeProvider.isDarkMode
                   ? AppColors.accentPurple
                   : AppColors.darkPink,
-              unselectedItemColor: themeProvider.isDarkMode 
+              unselectedItemColor: themeProvider.isDarkMode
                   ? AppColors.darkSecondaryText
                   : const Color.fromARGB(255, 21, 21, 21),
               onTap: (index) => setState(() => _currentIndex = index),
-          items: [
-            BottomNavigationBarItem(
-              icon: _NavIconBox(
-                icon: Icons.home,
-                isActive: _currentIndex == 0,
-                color: themeProvider.isDarkMode 
-                    ? AppColors.accentPurple
-                    : AppColors.darkPink,
-              ),
-              label: "Home",
+              items: [
+                BottomNavigationBarItem(
+                  icon: _NavIconBox(
+                    icon: Icons.home,
+                    isActive: _currentIndex == 0,
+                    color: themeProvider.isDarkMode ? AppColors.accentPurple : AppColors.darkPink,
+                  ),
+                  label: "Home",
+                ),
+                BottomNavigationBarItem(
+                  icon: _NavIconBox(
+                    icon: Icons.book,
+                    isActive: _currentIndex == 1,
+                    color: themeProvider.isDarkMode ? AppColors.accentPurple : AppColors.darkPink,
+                  ),
+                  label: "Journal",
+                ),
+                BottomNavigationBarItem(
+                  icon: _NavIconBox(
+                    icon: Icons.track_changes,
+                    isActive: _currentIndex == 2,
+                    color: themeProvider.isDarkMode ? AppColors.accentPurple : AppColors.darkPink,
+                  ),
+                  label: 'Goals',
+                ),
+                BottomNavigationBarItem(
+                  icon: _NavIconBox(
+                    icon: Icons.format_quote,
+                    isActive: _currentIndex == 3,
+                    color: themeProvider.isDarkMode ? AppColors.accentPurple : AppColors.darkPink,
+                  ),
+                  label: 'Quotes',
+                ),
+                BottomNavigationBarItem(
+                  icon: _NavIconBox(
+                    icon: Icons.self_improvement,
+                    isActive: _currentIndex == 4,
+                    color: themeProvider.isDarkMode ? AppColors.accentPurple : AppColors.darkPink,
+                  ),
+                  label: "Meditate",
+                ),
+              ],
             ),
-            BottomNavigationBarItem(
-              icon: _NavIconBox(
-                icon: Icons.book,
-                isActive: _currentIndex == 1,
-                color: themeProvider.isDarkMode 
-                    ? AppColors.accentPurple
-                    : AppColors.darkPink,
-              ),
-              label: "Journal",
-            ),
-            BottomNavigationBarItem(
-              icon: _NavIconBox(
-                icon: Icons.track_changes,
-                isActive: _currentIndex == 2,
-                color: themeProvider.isDarkMode 
-                    ? AppColors.accentPurple
-                    : AppColors.darkPink,
-              ),
-              label: 'Goals',
-            ),
-            BottomNavigationBarItem(
-              icon: _NavIconBox(
-                icon: Icons.format_quote,
-                isActive: _currentIndex == 3,
-                color: themeProvider.isDarkMode 
-                    ? AppColors.accentPurple
-                    : AppColors.darkPink,
-              ),
-              label: 'Quotes',
-            ),
-            BottomNavigationBarItem(
-              icon: _NavIconBox(
-                icon: Icons.self_improvement,
-                isActive: _currentIndex == 4,
-                color: themeProvider.isDarkMode 
-                    ? AppColors.accentPurple
-                    : AppColors.darkPink,
-              ),
-              label: "Meditate",
-            ),
-          ],
-        ),
-      ),
+          ),
         );
       },
     );

@@ -57,7 +57,8 @@ class MeditationStats {
 }
 
 class MeditationPage extends StatefulWidget {
-  const MeditationPage({super.key});
+  final VoidCallback? onBackToHome;
+  const MeditationPage({super.key, this.onBackToHome});
 
   @override
   State<MeditationPage> createState() => _MeditationPageState();
@@ -704,79 +705,101 @@ class _MeditationPageState extends State<MeditationPage> with SingleTickerProvid
   Widget build(BuildContext context) {
     return Consumer<ThemeProvider>(
       builder: (context, themeProvider, child) {
-        return Scaffold(
-          appBar: AppBar(
-            title: const Text(
-              'Meditation',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 26,
-                fontWeight: FontWeight.w900,
-                letterSpacing: 1.2,
-                shadows: [
-                  Shadow(
-                    offset: Offset(0, 2),
-                    blurRadius: 4,
-                    color: Colors.black26,
-                  ),
-                ],
+        return WillPopScope(
+          onWillPop: () async {
+            if (Navigator.of(context).canPop()) {
+              return true; // allow normal back when this page was pushed
+            }
+            if (widget.onBackToHome != null) {
+              widget.onBackToHome!(); // switch tab to Home instead of popping root
+              return false;
+            }
+            return true;
+          },
+          child: Scaffold(
+            appBar: AppBar(
+              title: const Text(
+                'Meditation',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 26,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: 1.2,
+                  shadows: [
+                    Shadow(
+                      offset: Offset(0, 2),
+                      blurRadius: 4,
+                      color: Colors.black26,
+                    ),
+                  ],
+                ),
+              ),
+              centerTitle: true,
+              backgroundColor: themeProvider.isDarkMode ? AppColors.mediumPurple : AppColors.hotPink,
+              automaticallyImplyLeading: false,
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back, color: Colors.white),
+                onPressed: () {
+                  if (Navigator.of(context).canPop()) {
+                    Navigator.of(context).pop(); // works for “Let’s Explore” push
+                  } else if (widget.onBackToHome != null) {
+                    widget.onBackToHome!(); // works for bottom tab
+                  }
+                },
               ),
             ),
-            centerTitle: true,
-            backgroundColor: themeProvider.isDarkMode ? AppColors.mediumPurple : AppColors.hotPink,
-            automaticallyImplyLeading: false,
-          ),
-          backgroundColor: themeProvider.isDarkMode
-              ? AppColors.darkPurple
-              : backgroundPink,
-          body: SafeArea(
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  // Button to view tracker page
-                  Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 18.0, horizontal: 18.0),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton.icon(
-                        icon: Icon(Icons.bar_chart, color: Colors.white),
-                        label: Text("View Progress Tracker", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: themeProvider.isDarkMode ? AppColors.mediumPurple : AppColors.hotPink,
-                          padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                        ),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => TrackerPage(
-                                stats: stats,
-                                todayMinutes: todayMinutes,
-                                dailyGoal: dailyGoal,
-                                history: history,
-                                isDarkMode: themeProvider.isDarkMode,
-                                appThemeColorAccent: appThemeColorAccent,
-                                appThemePurple: appThemePurple,
-                                hotPink: AppColors.hotPink,
-                                motivations: motivations,
-                                motivationIndex: _motivationIndex,
-                              ),
+            backgroundColor: themeProvider.isDarkMode
+                ? AppColors.darkPurple
+                : backgroundPink,
+            body: SafeArea(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    // Button to view tracker page
+                    Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 18.0, horizontal: 18.0),
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          icon: Icon(Icons.bar_chart, color: Colors.white),
+                          label: Text("View Progress Tracker", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: themeProvider.isDarkMode ? AppColors.mediumPurple : AppColors.hotPink,
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
                             ),
-                          );
-                        },
+                          ),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => TrackerPage(
+                                  stats: stats,
+                                  todayMinutes: todayMinutes,
+                                  dailyGoal: dailyGoal,
+                                  history: history,
+                                  isDarkMode: themeProvider.isDarkMode,
+                                  appThemeColorAccent: appThemeColorAccent,
+                                  appThemePurple: appThemePurple,
+                                  hotPink: AppColors.hotPink,
+                                  motivations: motivations,
+                                  motivationIndex: _motivationIndex,
+                                ),
+                              ),
+                            );
+                          },
+                        ),
                       ),
                     ),
-                  ),
-                  // Main content below tracker
-                  patternSelectionMode
-                      ? _buildPatternSelectionUI(themeProvider)
-                      : sessionReady
-                          ? _buildActiveSessionUI(themeProvider)
-                          : _buildSessionSelectionUI(themeProvider),
-                ],
+                    // Main content below tracker
+                    patternSelectionMode
+                        ? _buildPatternSelectionUI(themeProvider)
+                        : sessionReady
+                            ? _buildActiveSessionUI(themeProvider)
+                            : _buildSessionSelectionUI(themeProvider),
+                  ],
+                ),
               ),
             ),
           ),
