@@ -89,6 +89,12 @@ class _JournalListPageState extends State<JournalListPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final Color bgColor = isDark ? const Color(0xFF181829) : Colors.transparent;
+    final Color cardColor = isDark ? const Color(0xFF23233A) : Colors.white;
+    final Color textColor = isDark ? Colors.white : Colors.black;
+    final Color subTextColor = isDark ? Colors.grey.shade400 : Colors.grey.shade700;
+    final Color dateColor = isDark ? Colors.grey.shade500 : Colors.grey.shade500;
     return WillPopScope(
       onWillPop: () async {
         if (Navigator.of(context).canPop()) return true;
@@ -101,16 +107,18 @@ class _JournalListPageState extends State<JournalListPage> {
         return true;
       },
       child: Scaffold(
-        backgroundColor: Colors.transparent,
+        backgroundColor: bgColor,
         body: Container(
           constraints: const BoxConstraints.expand(),
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFFE7BDF0), Color(0xFFF7C7D7), Color(0xFFD6EAF8)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
+          decoration: isDark
+              ? null
+              : const BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Color(0xFFE7BDF0), Color(0xFFF7C7D7), Color(0xFFD6EAF8)],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
           child: SafeArea(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -121,6 +129,7 @@ class _JournalListPageState extends State<JournalListPage> {
                     children: [
                       IconButton(
                         icon: const Icon(Icons.arrow_back),
+                        color: textColor,
                         onPressed: () {
                           if (Navigator.of(context).canPop()) {
                             Navigator.of(context).pop();
@@ -133,12 +142,12 @@ class _JournalListPageState extends State<JournalListPage> {
                         },
                       ),
                       const SizedBox(width: 4),
-                      const Text(
+                      Text(
                         'Journal',
                         style: TextStyle(
                           fontSize: 28,
                           fontWeight: FontWeight.w700,
-                          color: Colors.black,
+                          color: textColor,
                         ),
                       ),
                     ],
@@ -157,13 +166,13 @@ class _JournalListPageState extends State<JournalListPage> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               IconButton(
-                                icon: Icon(Icons.add_circle_outline, size: 32),
+                                icon: Icon(Icons.add_circle_outline, size: 32, color: isDark ? Colors.white : Colors.black),
                                 tooltip: 'Add',
                                 onPressed: _addEntry,
                               ),
                               SizedBox(width: 18),
                               IconButton(
-                                icon: Icon(Icons.delete_outline, size: 32),
+                                icon: Icon(Icons.delete_outline, size: 32, color: isDark ? Colors.white : Colors.black),
                                 tooltip: 'Delete',
                                 onPressed: selected.isNotEmpty
                                     ? () {
@@ -176,7 +185,7 @@ class _JournalListPageState extends State<JournalListPage> {
                               ),
                               SizedBox(width: 18),
                               IconButton(
-                                icon: Icon(Icons.edit_outlined, size: 32),
+                                icon: Icon(Icons.edit_outlined, size: 32, color: isDark ? Colors.white : Colors.black),
                                 tooltip: 'Edit',
                                 onPressed: selected.length == 1
                                     ? () => _editEntry(docs.firstWhere((d) => selected.contains(d.id)))
@@ -184,7 +193,7 @@ class _JournalListPageState extends State<JournalListPage> {
                               ),
                               SizedBox(width: 18),
                               IconButton(
-                                icon: Icon(Icons.remove_red_eye_outlined, size: 32),
+                                icon: Icon(Icons.remove_red_eye_outlined, size: 32, color: isDark ? Colors.white : Colors.black),
                                 tooltip: 'View',
                                 onPressed: selected.length == 1
                                     ? () => _viewEntry(docs.firstWhere((d) => selected.contains(d.id)))
@@ -192,7 +201,7 @@ class _JournalListPageState extends State<JournalListPage> {
                               ),
                               SizedBox(width: 18),
                               IconButton(
-                                icon: Icon(Icons.select_all, size: 32),
+                                icon: Icon(Icons.select_all, size: 32, color: isDark ? Colors.white : Colors.black),
                                 tooltip: 'Select All',
                                 onPressed: docs.isNotEmpty ? () => _selectAll(docs) : null,
                               ),
@@ -219,9 +228,12 @@ class _JournalListPageState extends State<JournalListPage> {
                                         child: Container(
                                           margin: EdgeInsets.symmetric(vertical: 10),
                                           decoration: BoxDecoration(
-                                            color: Colors.white,
+                                            color: cardColor,
                                             borderRadius: BorderRadius.circular(22),
-                                            boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 12, offset: Offset(0, 2))],
+                                            boxShadow: [
+                                              if (!isDark)
+                                                BoxShadow(color: Colors.black12, blurRadius: 12, offset: Offset(0, 2))
+                                            ],
                                           ),
                                           child: Row(
                                             children: [
@@ -232,8 +244,8 @@ class _JournalListPageState extends State<JournalListPage> {
                                                   height: 28,
                                                   decoration: BoxDecoration(
                                                     shape: BoxShape.circle,
-                                                    border: Border.all(color: Colors.grey.shade400, width: 2),
-                                                    color: isSelected ? Colors.pink.shade100 : Colors.white,
+                                                    border: Border.all(color: isDark ? Colors.grey.shade600 : Colors.grey.shade400, width: 2),
+                                                    color: isSelected ? (isDark ? Colors.pink.shade200 : Colors.pink.shade100) : (isDark ? cardColor : Colors.white),
                                                   ),
                                                   child: isSelected
                                                       ? Icon(Icons.check, color: Colors.pink, size: 18)
@@ -246,11 +258,11 @@ class _JournalListPageState extends State<JournalListPage> {
                                                   child: Column(
                                                     crossAxisAlignment: CrossAxisAlignment.start,
                                                     children: [
-                                                      Text(entryDoc['name'] ?? '', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20)),
+                                                      Text(entryDoc['name'] ?? '', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: textColor)),
                                                       SizedBox(height: 6),
-                                                      Text(entryDoc['date'] ?? '', style: TextStyle(fontSize: 15, color: Colors.grey.shade500)),
+                                                      Text(entryDoc['date'] ?? '', style: TextStyle(fontSize: 15, color: dateColor)),
                                                       SizedBox(height: 6),
-                                                      Text(entryDoc['entry'] ?? '', style: TextStyle(fontSize: 16, color: Colors.grey.shade700), maxLines: 1, overflow: TextOverflow.ellipsis),
+                                                      Text(entryDoc['entry'] ?? '', style: TextStyle(fontSize: 16, color: subTextColor), maxLines: 1, overflow: TextOverflow.ellipsis),
                                                     ],
                                                   ),
                                                 ),
@@ -266,7 +278,7 @@ class _JournalListPageState extends State<JournalListPage> {
                                   child: Center(
                                     child: Text(
                                       "Start your journaling journey today! Tap + to add your first entry.",
-                                      style: TextStyle(fontSize: 18, color: Colors.grey.shade700, fontWeight: FontWeight.w500),
+                                      style: TextStyle(fontSize: 18, color: subTextColor, fontWeight: FontWeight.w500),
                                       textAlign: TextAlign.center,
                                     ),
                                   ),
