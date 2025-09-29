@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../components/text_box.dart';
+import 'startUp_page.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -20,30 +21,39 @@ class _ProfilePageState extends State<ProfilePage> {
     await showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: Colors.grey[900],
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         title: Text(
           "Edit $field",
-          style: const TextStyle(color: Colors.white),
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+            color: Colors.pink[400],
+          ),
         ),
         content: TextField(
           controller: controller,
           autofocus: true,
-          style: const TextStyle(color: Colors.white),
+          style: TextStyle(color: Colors.black),
           decoration: InputDecoration(
             hintText: "Enter new $field",
-            hintStyle: TextStyle(color: Colors.grey),
+            hintStyle: TextStyle(color: Colors.grey[600]),
+            focusedBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.pink[400]!),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.grey[400]!),
+            ),
           ),
         ),
         actions: [
-          // cancel button
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: const Text(
               "Cancel",
-              style: TextStyle(color: Colors.white),
+              style: TextStyle(color: Colors.grey),
             ),
           ),
-          // save button
           TextButton(
             onPressed: () async {
               newValue = controller.text.trim();
@@ -57,7 +67,7 @@ class _ProfilePageState extends State<ProfilePage> {
             },
             child: const Text(
               "Save",
-              style: TextStyle(color: Colors.blue),
+              style: TextStyle(color: Colors.pink),
             ),
           ),
         ],
@@ -65,67 +75,121 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
+  // Updated logout method
+  Future<void> logout() async {
+    await FirebaseAuth.instance.signOut();
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+          builder: (context) => LoginPage()), // Navigate directly to LoginPage
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(title: Text('Welcome to the Profile Page')),
-        body: StreamBuilder<DocumentSnapshot>(
-          stream: FirebaseFirestore.instance
-              .collection("Users")
-              .doc(currentUser.email)
-              .snapshots(),
-          builder: (context, snapshot) {
-            if (snapshot.hasData) {
-              final userData = snapshot.data!.data() as Map<String, dynamic>;
-              return ListView(
-                children: [
-                  SizedBox(height: 50),
-                  Icon(
-                    Icons.person,
-                    size: 72,
-                  ),
-                  Text(
-                    currentUser.email!,
-                    textAlign: TextAlign.center,
-                  ),
-                  SizedBox(height: 50),
-                  Padding(
-                    padding: const EdgeInsets.only(left: 25.0),
-                    child: Text(
-                      'My details',
-                      style: TextStyle(color: Colors.grey[600]),
+      backgroundColor: Colors.white, // Light background for the page
+      appBar: AppBar(
+        title: Text('Profile', style: TextStyle(color: Colors.black)),
+        backgroundColor: Colors.pink[100], // Light pink app bar
+        elevation: 0,
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.logout, color: Colors.black),
+            onPressed: logout, // Logout when button is pressed
+          ),
+        ],
+      ),
+      body: StreamBuilder<DocumentSnapshot>(
+        stream: FirebaseFirestore.instance
+            .collection("Users")
+            .doc(currentUser.email)
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.hasData) {
+            final userData = snapshot.data!.data() as Map<String, dynamic>;
+            return ListView(
+              padding: EdgeInsets.symmetric(horizontal: 20.0),
+              children: [
+                SizedBox(height: 30),
+                Center(
+                  child: CircleAvatar(
+                    radius: 60,
+                    backgroundColor: Colors.pink[100],
+                    child: Icon(
+                      Icons.person,
+                      size: 70,
+                      color: Colors.white,
                     ),
                   ),
-                  //username
-                  MyTextBox(
-                    text: userData['username'],
-                    sectionName: 'username',
-                    onPressed: () => editField('username'),
+                ),
+                SizedBox(height: 15),
+                Text(
+                  currentUser.email!,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
                   ),
-                  //birthday
-                  MyTextBox(
-                    text: userData['birthday'],
-                    sectionName: 'birthday',
-                    onPressed: () => editField('birthday'),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: 30),
+                Padding(
+                  padding: const EdgeInsets.only(left: 25.0),
+                  child: Text(
+                    'My Details',
+                    style: TextStyle(color: Colors.pink[300], fontSize: 18),
                   ),
-                  //bio
-                  MyTextBox(
-                    text: userData['bio'],
-                    sectionName: 'bio',
-                    onPressed: () => editField('bio'),
+                ),
+                SizedBox(height: 20),
+                // Username Field
+                MyTextBox(
+                  text: userData['username'],
+                  sectionName: 'username',
+                  onPressed: () => editField('username'),
+                ),
+                // Birthday Field
+                MyTextBox(
+                  text: userData['birthday'],
+                  sectionName: 'birthday',
+                  onPressed: () => editField('birthday'),
+                ),
+                // Bio Field
+                MyTextBox(
+                  text: userData['bio'],
+                  sectionName: 'bio',
+                  onPressed: () => editField('bio'),
+                ),
+                SizedBox(height: 30),
+                // Logout Button at the bottom of the screen
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 25.0),
+                  child: ElevatedButton(
+                    onPressed: logout,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.pink[300], // Pink button color
+                      padding: EdgeInsets.symmetric(vertical: 15),
+                    ),
+                    child: Text(
+                      'Logout',
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ),
-                  SizedBox(height: 50),
-                ],
-              );
-            } else if (snapshot.hasError) {
-              return Center(
-                child: Text('Error${snapshot.error}'),
-              );
-            }
-            return const Center(
-              child: CircularProgressIndicator(),
+                ),
+                SizedBox(height: 50),
+              ],
             );
-          },
-        ));
+          } else if (snapshot.hasError) {
+            return Center(
+              child: Text('Error: ${snapshot.error}'),
+            );
+          }
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        },
+      ),
+    );
   }
 }

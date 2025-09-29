@@ -3,6 +3,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:convert';
 
 class MyGoalPage extends StatefulWidget {
+  final VoidCallback? onBackToHome;
+  const MyGoalPage({Key? key, this.onBackToHome}) : super(key: key);
   @override
   State<MyGoalPage> createState() => _MyGoalPageState();
 }
@@ -77,8 +79,8 @@ class _MyGoalPageState extends State<MyGoalPage> {
     showDialog(
       context: context,
       builder: (ctx) {
-        TextEditingController controller = TextEditingController(
-            text: isHealth ? healthTitle : personalTitle);
+        TextEditingController controller =
+            TextEditingController(text: isHealth ? healthTitle : personalTitle);
 
         return AlertDialog(
           title: Text("Change Section Title"),
@@ -145,8 +147,8 @@ class _MyGoalPageState extends State<MyGoalPage> {
                   Padding(
                     padding: const EdgeInsets.only(top: 6.0),
                     child: Text("Due: ${goal['due']}",
-                        style: const TextStyle(
-                            fontSize: 13, color: Colors.grey)),
+                        style:
+                            const TextStyle(fontSize: 13, color: Colors.grey)),
                   )
               ],
             ),
@@ -154,9 +156,7 @@ class _MyGoalPageState extends State<MyGoalPage> {
           const SizedBox(width: 12),
           IconButton(
             icon: Icon(
-              goal['done']
-                  ? Icons.check_circle
-                  : Icons.radio_button_unchecked,
+              goal['done'] ? Icons.check_circle : Icons.radio_button_unchecked,
               color: Colors.white,
             ),
             onPressed: () =>

@@ -49,7 +49,9 @@ class _MainNavigationState extends State<MainNavigation> {
                   : AppColors.lightPink,
               boxShadow: [
                 BoxShadow(
-                  color: themeProvider.isDarkMode ? Colors.black26 : Colors.black12,
+                  color: themeProvider.isDarkMode
+                      ? Colors.black26
+                      : Colors.black12,
                   blurRadius: 8,
                   offset: const Offset(0, -2),
                 ),
@@ -72,7 +74,9 @@ class _MainNavigationState extends State<MainNavigation> {
                   icon: _NavIconBox(
                     icon: Icons.home,
                     isActive: _currentIndex == 0,
-                    color: themeProvider.isDarkMode ? AppColors.accentPurple : AppColors.darkPink,
+                    color: themeProvider.isDarkMode
+                        ? AppColors.accentPurple
+                        : AppColors.darkPink,
                   ),
                   label: "Home",
                 ),
@@ -80,7 +84,9 @@ class _MainNavigationState extends State<MainNavigation> {
                   icon: _NavIconBox(
                     icon: Icons.book,
                     isActive: _currentIndex == 1,
-                    color: themeProvider.isDarkMode ? AppColors.accentPurple : AppColors.darkPink,
+                    color: themeProvider.isDarkMode
+                        ? AppColors.accentPurple
+                        : AppColors.darkPink,
                   ),
                   label: "Journal",
                 ),
@@ -88,7 +94,9 @@ class _MainNavigationState extends State<MainNavigation> {
                   icon: _NavIconBox(
                     icon: Icons.track_changes,
                     isActive: _currentIndex == 2,
-                    color: themeProvider.isDarkMode ? AppColors.accentPurple : AppColors.darkPink,
+                    color: themeProvider.isDarkMode
+                        ? AppColors.accentPurple
+                        : AppColors.darkPink,
                   ),
                   label: 'Goals',
                 ),
@@ -96,7 +104,9 @@ class _MainNavigationState extends State<MainNavigation> {
                   icon: _NavIconBox(
                     icon: Icons.format_quote,
                     isActive: _currentIndex == 3,
-                    color: themeProvider.isDarkMode ? AppColors.accentPurple : AppColors.darkPink,
+                    color: themeProvider.isDarkMode
+                        ? AppColors.accentPurple
+                        : AppColors.darkPink,
                   ),
                   label: 'Quotes',
                 ),
@@ -104,7 +114,9 @@ class _MainNavigationState extends State<MainNavigation> {
                   icon: _NavIconBox(
                     icon: Icons.self_improvement,
                     isActive: _currentIndex == 4,
-                    color: themeProvider.isDarkMode ? AppColors.accentPurple : AppColors.darkPink,
+                    color: themeProvider.isDarkMode
+                        ? AppColors.accentPurple
+                        : AppColors.darkPink,
                   ),
                   label: "Meditate",
                 ),
@@ -139,9 +151,9 @@ class _NavIconBox extends StatelessWidget {
           padding: const EdgeInsets.all(6),
           child: Icon(
             icon,
-            color: isActive 
-                ? color 
-                : (themeProvider.isDarkMode 
+            color: isActive
+                ? color
+                : (themeProvider.isDarkMode
                     ? AppColors.darkSecondaryText
                     : const Color.fromARGB(255, 21, 21, 21)),
           ),
@@ -150,4 +162,3 @@ class _NavIconBox extends StatelessWidget {
     );
   }
 }
-
