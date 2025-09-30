@@ -15,9 +15,13 @@ class MyTextBox extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.lightPink,
+        color: isDarkMode
+            ? Colors.black
+            : AppColors.lightPink, // Adjust background color for dark mode
         borderRadius: BorderRadius.circular(8),
       ),
       padding: const EdgeInsets.only(
@@ -33,17 +37,32 @@ class MyTextBox extends StatelessWidget {
             children: [
               Text(
                 sectionName,
-                style: TextStyle(color: Colors.black),
+                style: TextStyle(
+                  color: isDarkMode
+                      ? Colors.white
+                      : Colors.black, // Set text color based on dark mode
+                ),
               ),
-
-              // edit button
+              // Edit button
               IconButton(
                 onPressed: onPressed, // Pass the onPressed function here
-                icon: Icon(Icons.settings),
+                icon: Icon(
+                  Icons.settings,
+                  color: isDarkMode
+                      ? Colors.white
+                      : Colors.black, // Set icon color based on dark mode
+                ),
               ),
             ],
           ),
-          Text(text),
+          Text(
+            text,
+            style: TextStyle(
+              color: isDarkMode
+                  ? Colors.white
+                  : Colors.black, // Set text color based on dark mode
+            ),
+          ),
         ],
       ),
     );
