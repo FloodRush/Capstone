@@ -1,0 +1,2 @@
+C:/Users/lazom/Desktop/school/flutteraps/project/android/app/.cxx/Debug/xf42k4i2/x86_64/CMakeFiles/edit_cache.dir
+C:/Users/lazom/Desktop/school/flutteraps/project/android/app/.cxx/Debug/xf42k4i2/x86_64/CMakeFiles/rebuild_cache.dir

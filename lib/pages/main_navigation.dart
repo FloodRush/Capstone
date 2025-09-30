@@ -3,7 +3,7 @@ import 'package:project/theme.dart';
 import 'home_page.dart';
 import 'journal_list_page.dart';
 import 'meditation_page.dart';
-import 'goal_tracking_page.dart';
+import 'my_goal_page.dart';
 import 'motivation_page.dart';
 import 'package:provider/provider.dart';
 import '../providers/theme_provider.dart';

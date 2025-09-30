@@ -5,7 +5,7 @@ import 'journal_page.dart';
 import 'journal_list_page.dart';
 import 'meditation_page.dart';
 //import 'goal_page.dart';
-import 'goal_tracking_page.dart';
+import 'my_goal_page.dart';
 import 'motivation_page.dart';
 import 'mood_tracker_page.dart';
 import 'profile_page.dart';
