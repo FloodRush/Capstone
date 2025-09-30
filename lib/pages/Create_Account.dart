@@ -31,180 +31,187 @@ class _MyCreateAccount extends State<MyCreateAccount> {
 
   @override
   Widget build(BuildContext context) {
-    return Theme(
-      // Override theme for create account page to always use light theme
-      data: ThemeData.light().copyWith(
-        primaryColor: AppColors.hotPink,
-      ),
-      child: Scaffold(
-        appBar: AppBar(
-          backgroundColor: AppColors.hotPink,
-          title: Text(
-            widget.title,
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-          centerTitle: true,
-          iconTheme: IconThemeData(color: Colors.white),
+    return Scaffold(
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: appGradientBackground(), // same as LoginPage
         ),
-        backgroundColor: Colors.grey[300], // Rest of the screen bg color
-        body: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Email Field
-                TextFormField(
-                  controller: _emailController,
-                  style:
-                      TextStyle(color: Colors.black), // Ensure text is visible
-                  decoration: const InputDecoration(
-                    labelText: 'Email',
-                    labelStyle: TextStyle(color: Colors.black54),
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(),
-                  ),
-                  keyboardType: TextInputType.emailAddress,
-                  validator: (value) {
-                    if (value!.isEmpty) return 'Please enter your email';
-                    if (!RegExp(
-                      r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$",
-                    ).hasMatch(value)) {
-                      return 'Enter a valid email';
-                    }
-                    return null;
-                  },
-                ),
-
-                const SizedBox(height: 12),
-
-                // username Field
-                TextFormField(
-                  controller: _usernameController,
-                  style:
-                      TextStyle(color: Colors.black), // Ensure text is visible
-                  decoration: const InputDecoration(
-                    labelText: 'Display name',
-                    labelStyle: TextStyle(color: Colors.black54),
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 12),
-                TextFormField(
-                  controller: _birthdayController,
-                  readOnly: true,
-                  style: TextStyle(color: Colors.black),
-                  decoration: const InputDecoration(
-                    labelText: 'Birthday',
-                    labelStyle: TextStyle(color: Colors.black54),
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(),
-                    suffixIcon: Icon(Icons.calendar_today),
-                  ),
-                  onTap: () async {
-                    DateTime? pickedDate = await showDatePicker(
-                      context: context,
-                      initialDate: DateTime(2007),
-                      firstDate: DateTime(1900),
-                      lastDate: DateTime.now(),
-                    );
-                    if (pickedDate != null) {
-                      _birthdayController.text =
-                          pickedDate.toLocal().toString().split(' ')[0];
-                    }
-                  },
-                  validator: (value) {
-                    if (value == null || value.isEmpty)
-                      return 'Please select your birthday';
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 12),
-
-                // Password Field
-                TextFormField(
-                  controller: _passwordController,
-                  style:
-                      TextStyle(color: Colors.black), // Ensure text is visible
-                  decoration: const InputDecoration(
-                    labelText: 'Password',
-                    labelStyle: TextStyle(color: Colors.black54),
-                    filled: true,
-                    fillColor: Colors.white,
-                    border: OutlineInputBorder(),
-                  ),
-                  obscureText: true,
-                  validator: (value) {
-                    if (value!.isEmpty) return 'Please enter a password';
-                    if (value.length < 6)
-                      return 'Password must be at least 6 characters';
-                    return null;
-                  },
-                ),
-
-                const SizedBox(height: 20),
-                // Submit Button
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      if (_formKey.currentState!.validate()) {
-                        try {
-                          // Sign up the user using Firebase Authentication
-                          UserCredential userCredential = await FirebaseAuth
-                              .instance
-                              .createUserWithEmailAndPassword(
-                            email: _emailController.text,
-                            password: _passwordController.text,
-                          );
-                          var myId =
-                              generateID(); // fixed: call the function to get the ID string
-                          // Store the email in Firestore
-                          await FirebaseFirestore.instance
-                              .collection("Users")
-                              .doc(userCredential.user!.email)
-                              .set({
-                            'email': userCredential.user!.email,
-                            'username': _usernameController.text,
-                            'bio': "empty bio...", // Default bio
-                            'id': myId, //added by me
-                            'birthday': _birthdayController.text,
-                          });
-
-                          // Navigate to the homepage after successful signup
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => const MainNavigation()),
-                          );
-                        } on FirebaseAuthException catch (e) {
-                          // Handle errors
-                          print("Error during sign up: ${e.message}");
-                        }
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor:
-                          AppColors.hotPink, // Set the button color here
-                      foregroundColor: Colors.white, // Force white text
-                      textStyle: TextStyle(
-                        fontSize: 16,
+        child: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(16.0),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.person_add,
+                        size: 100, color: Colors.white),
+                    const SizedBox(height: 20),
+                    const Text(
+                      'Create Your FreshStart Account',
+                      style: TextStyle(
+                        fontSize: 24,
                         fontWeight: FontWeight.bold,
+                        color: Colors.white,
                       ),
                     ),
-                    child: const Text('Create Account'),
-                  ),
+                    const SizedBox(height: 30),
+
+                    // Email Field
+                    TextFormField(
+                      controller: _emailController,
+                      decoration: const InputDecoration(
+                        labelText: 'Email',
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(),
+                      ),
+                      keyboardType: TextInputType.emailAddress,
+                      validator: (value) {
+                        if (value!.isEmpty) return 'Please enter your email';
+                        if (!RegExp(
+                          r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$",
+                        ).hasMatch(value)) {
+                          return 'Enter a valid email';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 12),
+
+                    // Username Field
+                    TextFormField(
+                      controller: _usernameController,
+                      decoration: const InputDecoration(
+                        labelText: 'Display name',
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter a display name';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 12),
+
+                    // Birthday Field
+                    TextFormField(
+                      controller: _birthdayController,
+                      readOnly: true,
+                      decoration: const InputDecoration(
+                        labelText: 'Birthday',
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(),
+                        suffixIcon: Icon(Icons.calendar_today),
+                      ),
+                      onTap: () async {
+                        DateTime? pickedDate = await showDatePicker(
+                          context: context,
+                          initialDate: DateTime(2007),
+                          firstDate: DateTime(1900),
+                          lastDate: DateTime.now(),
+                        );
+                        if (pickedDate != null) {
+                          _birthdayController.text =
+                              pickedDate.toLocal().toString().split(' ')[0];
+                        }
+                      },
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please select your birthday';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 12),
+
+                    // Password Field
+                    TextFormField(
+                      controller: _passwordController,
+                      decoration: const InputDecoration(
+                        labelText: 'Password',
+                        filled: true,
+                        fillColor: Colors.white,
+                        border: OutlineInputBorder(),
+                      ),
+                      obscureText: true,
+                      validator: (value) {
+                        if (value!.isEmpty) return 'Please enter a password';
+                        if (value.length < 6) {
+                          return 'Password must be at least 6 characters';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 20),
+
+                    // Create Account Button
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          if (_formKey.currentState!.validate()) {
+                            try {
+                              UserCredential userCredential = await FirebaseAuth
+                                  .instance
+                                  .createUserWithEmailAndPassword(
+                                email: _emailController.text,
+                                password: _passwordController.text,
+                              );
+                              var myId = generateID();
+                              await FirebaseFirestore.instance
+                                  .collection("Users")
+                                  .doc(userCredential.user!.email)
+                                  .set({
+                                'email': userCredential.user!.email,
+                                'username': _usernameController.text,
+                                'bio': "empty bio...",
+                                'id': myId,
+                                'birthday': _birthdayController.text,
+                              });
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const MainNavigation(),
+                                ),
+                              );
+                            } on FirebaseAuthException catch (e) {
+                              print("Error during sign up: ${e.message}");
+                            }
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.white,
+                          foregroundColor: Colors.blue,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 50,
+                            vertical: 15,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                        child: const Text('Create Account'),
+                      ),
+                    ),
+
+                    const SizedBox(height: 10),
+                    // Login Redirect Button
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text(
+                        'Already have an account? Log in.',
+                        style: TextStyle(color: Colors.white),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         ),

@@ -1,4 +1,4 @@
- import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import '../theme.dart';
 import 'main_navigation.dart';
 import 'Create_Account.dart';
@@ -19,7 +19,8 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return MediaQuery(
-      data: MediaQuery.of(context).copyWith(platformBrightness: Brightness.light),
+      data:
+          MediaQuery.of(context).copyWith(platformBrightness: Brightness.light),
       child: Theme(
         data: ThemeData.light().copyWith(
           useMaterial3: false,
@@ -59,7 +60,8 @@ class _LoginPageState extends State<LoginPage> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Icon(Icons.lock, size: 100, color: Colors.white),
+                          const Icon(Icons.lock,
+                              size: 100, color: Colors.white),
                           const SizedBox(height: 20),
                           const Text(
                             'Welcome back to FreshStart!',
@@ -83,7 +85,8 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                             keyboardType: TextInputType.emailAddress,
                             validator: (value) {
-                              if (value!.isEmpty) return 'Please enter your email';
+                              if (value!.isEmpty)
+                                return 'Please enter your email';
                               if (!RegExp(
                                 r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$",
                               ).hasMatch(value)) {
@@ -106,7 +109,8 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                             obscureText: true,
                             validator: (value) {
-                              if (value!.isEmpty) return 'Please enter a password';
+                              if (value!.isEmpty)
+                                return 'Please enter a password';
                               if (value.length < 6) {
                                 return 'Password must be at least 6 characters';
                               }

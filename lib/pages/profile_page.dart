@@ -1,6 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'dart:io';
 import '../components/text_box.dart';
 import 'startUp_page.dart';
 
@@ -14,6 +17,41 @@ class ProfilePage extends StatefulWidget {
 class _ProfilePageState extends State<ProfilePage> {
   final currentUser = FirebaseAuth.instance.currentUser!;
 
+  // Method to pick an image from gallery
+  Future<void> _pickImage() async {
+    final ImagePicker _picker = ImagePicker();
+
+    // Pick an image from gallery or take a new photo
+    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
+
+    if (image != null) {
+      final file = File(image.path);
+      try {
+        // Upload the image to Firebase Storage
+        final ref = FirebaseStorage.instance
+            .ref()
+            .child('profile_pictures')
+            .child(currentUser.email! + '.jpg');
+
+        await ref.putFile(file);
+
+        // Get the URL of the uploaded image
+        String imageUrl = await ref.getDownloadURL();
+
+        // Update the user's profile picture in Firestore
+        await FirebaseFirestore.instance
+            .collection("Users")
+            .doc(currentUser.email)
+            .update({'profilePicture': imageUrl});
+
+        setState(() {}); // Refresh the UI to show new profile picture
+      } catch (e) {
+        print("Error uploading image: $e");
+      }
+    }
+  }
+
+  // Method to edit user fields like username, birthday, etc.
   Future<void> editField(String field) async {
     String newValue = "";
     TextEditingController controller = TextEditingController();
@@ -75,7 +113,7 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  // Updated logout method
+  // Method to log out the user
   Future<void> logout() async {
     await FirebaseAuth.instance.signOut();
     Navigator.pushReplacement(
@@ -117,10 +155,19 @@ class _ProfilePageState extends State<ProfilePage> {
                   child: CircleAvatar(
                     radius: 60,
                     backgroundColor: Colors.pink[100],
-                    child: Icon(
-                      Icons.person,
-                      size: 70,
-                      color: Colors.white,
+                    backgroundImage: userData['profilePicture'] != null
+                        ? NetworkImage(userData[
+                            'profilePicture']) // If profile picture exists, show it
+                        : null, // No background image if there's no profile picture
+                    child: GestureDetector(
+                      onTap: _pickImage, // Allow the user to pick a new image
+                      child: userData['profilePicture'] == null
+                          ? Icon(
+                              Icons.person,
+                              size: 70,
+                              color: Colors.white,
+                            ) // Default icon if no profile picture
+                          : null, // No icon if profile picture exists
                     ),
                   ),
                 ),
