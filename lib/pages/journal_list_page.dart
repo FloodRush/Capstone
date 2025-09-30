@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'journal_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -15,7 +13,7 @@ class JournalListPage extends StatefulWidget {
 class _JournalListPageState extends State<JournalListPage> {
   final user = FirebaseAuth.instance.currentUser;
   Set<String> selected = {};
-  final searchController = TextEditingController();
+
   Stream<QuerySnapshot> getEntriesStream() {
     return FirebaseFirestore.instance
       .collection('Entries')
@@ -39,13 +37,11 @@ class _JournalListPageState extends State<JournalListPage> {
           initialTitle: entryDoc['name'] ?? '',
           initialDate: entryDoc['date'] ?? '',
           initialEntry: entryDoc['entry'] ?? '',
-          initialTag: entryDoc['tag'],
-          onSave: (title, date, entry, tag) async {
+          onSave: (title, date, entryText) async {
             await entryDoc.reference.update({
               'name': title,
               'date': date,
-              'entry': entry,
-              'tag': tag,
+              'entry': entryText,
             });
           },
         ),
@@ -157,48 +153,16 @@ class _JournalListPageState extends State<JournalListPage> {
                     ],
                   ),
                 ),
-                // --- Original body rent below ---
+                // --- Original body content below ---
                 Expanded(
                   child: StreamBuilder<QuerySnapshot>(
                     stream: getEntriesStream(),
                     builder: (context, snapshot) {
                       final docs = snapshot.data?.docs ?? [];
                       bool hasEntries = docs.isNotEmpty;
-                  
-                /*return Column(
-                  children: [
-                    Container(
-                      padding: EdgeInsets.all(8),
-                      child: TextField(
-                        controller: searchController,
-                        decoration: InputDecoration(
-                          hintText: 'Search',
-                          prefixIcon: Icon(Icons.search),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(30),
-                            borderSide: BorderSide.none,
-                          ),
-                          filled: true,
-                          fillColor: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
-                        ),
-                      ),
-      ),
-                    Expanded(
-                      child: hasEntries ? ListView.builder(
-                        itemCount: docs.length,
-                        itemBuilder: (context, index) {
-                          final doc = docs[index];
-                          return ListTile(
-                            title: Text(doc['name'] ?? ''),
-                            subtitle: Text(doc['date'] ?? ''), // Changed from `body:` to `subtitle:`
-                          );
-                        },
-                    ) 
-                    );*/      
-                       return Column(
-                        children: [     
-                          // SizedBox(height: 8),
-                           Row(
+                      return Column(
+                        children: [
+                          Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               IconButton(
@@ -319,7 +283,7 @@ class _JournalListPageState extends State<JournalListPage> {
                                     ),
                                   ),
                                 ),
-                ], 
+                        ],
                       );
                     },
                   ),
