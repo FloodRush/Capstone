@@ -6,6 +6,8 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:io';
 import '../components/text_box.dart';
 import 'startUp_page.dart';
+import '../providers/theme_provider.dart';
+import '../theme.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -125,16 +127,28 @@ class _ProfilePageState extends State<ProfilePage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Colors.white, // Light background for the page
+      backgroundColor: isDarkMode
+          ? AppColors.darkPurple
+          : Colors.white, // Dark mode background
       appBar: AppBar(
-        title: Text('Profile', style: TextStyle(color: Colors.black)),
-        backgroundColor: Colors.pink[100], // Light pink app bar
+        title: Text(
+          'Profile',
+          style: TextStyle(
+            color: isDarkMode ? Colors.white : Colors.black,
+          ),
+        ),
+        backgroundColor: isDarkMode
+            ? AppColors.darkPurple
+            : Colors.pink[100], // Dark mode app bar
         elevation: 0,
         centerTitle: true,
         actions: [
           IconButton(
-            icon: Icon(Icons.logout, color: Colors.black),
+            icon: Icon(Icons.logout,
+                color: isDarkMode ? Colors.white : Colors.black),
             onPressed: logout, // Logout when button is pressed
           ),
         ],
@@ -154,7 +168,8 @@ class _ProfilePageState extends State<ProfilePage> {
                 Center(
                   child: CircleAvatar(
                     radius: 60,
-                    backgroundColor: Colors.pink[100],
+                    backgroundColor:
+                        isDarkMode ? Colors.pink[700] : Colors.pink[100],
                     backgroundImage: userData['profilePicture'] != null
                         ? NetworkImage(userData[
                             'profilePicture']) // If profile picture exists, show it
@@ -165,7 +180,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           ? Icon(
                               Icons.person,
                               size: 70,
-                              color: Colors.white,
+                              color: isDarkMode ? Colors.white : Colors.black,
                             ) // Default icon if no profile picture
                           : null, // No icon if profile picture exists
                     ),
@@ -177,7 +192,7 @@ class _ProfilePageState extends State<ProfilePage> {
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                    color: isDarkMode ? Colors.white : Colors.black87,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -186,7 +201,10 @@ class _ProfilePageState extends State<ProfilePage> {
                   padding: const EdgeInsets.only(left: 25.0),
                   child: Text(
                     'My Details',
-                    style: TextStyle(color: Colors.pink[300], fontSize: 18),
+                    style: TextStyle(
+                      color: isDarkMode ? Colors.pink[300] : Colors.pink[300],
+                      fontSize: 18,
+                    ),
                   ),
                 ),
                 SizedBox(height: 20),
@@ -215,12 +233,15 @@ class _ProfilePageState extends State<ProfilePage> {
                   child: ElevatedButton(
                     onPressed: logout,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.pink[300], // Pink button color
+                      backgroundColor: isDarkMode
+                          ? Colors.pink[700]
+                          : Colors.pink[300], // Pink button color
                       padding: EdgeInsets.symmetric(vertical: 15),
                     ),
                     child: Text(
                       'Logout',
-                      style: TextStyle(color: Colors.white),
+                      style: TextStyle(
+                          color: isDarkMode ? Colors.white : Colors.white),
                     ),
                   ),
                 ),
