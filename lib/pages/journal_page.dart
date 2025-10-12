@@ -9,13 +9,15 @@ class JournalPage extends StatefulWidget {
   final String? initialTitle;
   final String? initialDate;
   final String? initialEntry;
-  final void Function(String title, String date, String entry)? onSave;
+  final List<String>? initialTag;
+  final void Function(String title, String date, String entry, List<String> tag)? onSave;
 
   const JournalPage({
     super.key,
     this.initialTitle,
     this.initialDate,
     this.initialEntry,
+    this.initialTag,
     this.onSave,
   });
 
@@ -27,10 +29,12 @@ class _UIState extends State<JournalPage> {
   final List<String> entry = [];
   final List<String> name = [];
   final List<String> date = [];
+  List<String> tag = [];
   final formkey = GlobalKey<FormState>();
   final dateController = TextEditingController();
   final nameController = TextEditingController();
   final entryController = TextEditingController();
+  final tagController = TextEditingController();
   DateTime startDate = DateTime(2025, 5, 7);
 
   final userInstance = FirebaseAuth.instance;
@@ -48,12 +52,20 @@ class _UIState extends State<JournalPage> {
     if (widget.initialTitle != null) nameController.text = widget.initialTitle!;
     if (widget.initialDate != null) dateController.text = widget.initialDate!;
     if (widget.initialEntry != null) entryController.text = widget.initialEntry!;
+    if (widget.initialTag != null) {
+    tag = widget.initialTag! ?? [];
+    tagController.text = tag.join(', ');
+    }
   }
+
 
   void add() {
     if (widget.onSave != null) {
       // Editing: only call the callback, do not add a new entry
-      widget.onSave!(nameController.text.trim(), dateController.text.trim(), entryController.text.trim());
+      widget.onSave!(nameController.text.trim(), dateController.text.trim(), entryController.text.trim(), tagController.text.split(',')
+      .map((t) => t.trim())
+      .where((t) => t.isNotEmpty)
+      .toList());
       Navigator.pop(context);
       return;
     }
@@ -62,6 +74,7 @@ class _UIState extends State<JournalPage> {
       date.add(dateController.text.trim());
       name.add(nameController.text.trim());
       entry.add(entryController.text.trim());
+      tag.add(tagController.text.trim());
     });
     FirebaseFirestore.instance
         .collection("Entries")
@@ -69,6 +82,7 @@ class _UIState extends State<JournalPage> {
       'date': dateController.text.trim(),
       'name': nameController.text.trim(),
       'entry': entryController.text.trim(),
+      'tag': tagController.text.trim(),
       'uid': userInstance.currentUser!.uid
     });
     Navigator.pop(context); // Always go back to JournalListPage after saving
@@ -111,7 +125,8 @@ class _UIState extends State<JournalPage> {
       database.doc(userInstance.currentUser!.uid).update({
       'date': FieldValue.delete(),
       'name': FieldValue.delete(),
-      'entry': FieldValue.delete(),     
+      'entry': FieldValue.delete(),  
+      'tag': FieldValue.delete(),  
     });
         print('Entry does not exist');
       }
@@ -156,6 +171,7 @@ class _UIState extends State<JournalPage> {
       'date': dateController.text.trim(),
       'name': nameController.text.trim(),
       'entry': entryController.text.trim(),
+      'tag': tagController.text.trim(),
     });
       } else if (entry.isEmpty) {
         print('Entry does not exist');
@@ -171,7 +187,7 @@ class _UIState extends State<JournalPage> {
         if (entry.isNotEmpty && i != -1) {
           return AlertDialog(
             title: Text('Name: ${name[i]}'),
-            content: Text('Date: ${date[i]}\n\n${entry[i]}'),
+            content: Text('Date: ${date[i]}\n\n${entry[i]}\n\n${tag}'),
           );
         } else if (entry.isEmpty) {
           return AlertDialog(
@@ -326,7 +342,16 @@ class _UIState extends State<JournalPage> {
                                     contentPadding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 12.0),
                                   ),
                                 ),
+                                
                               ),
+                               TextField(
+                                  controller: tagController,
+                                  decoration: InputDecoration(
+                                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                                    hintText: 'Tag',
+                                    contentPadding: EdgeInsets.symmetric(horizontal: 10.0),
+                                  ),
+                                ),
                             ],
                           ),
                         ),
