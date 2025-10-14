@@ -74,7 +74,7 @@ class _UIState extends State<JournalPage> {
       date.add(dateController.text.trim());
       name.add(nameController.text.trim());
       entry.add(entryController.text.trim());
-      tag.add(tagController.text.trim());
+      //tag.add(tagController.text.trim());
     });
     FirebaseFirestore.instance
         .collection("Entries")
@@ -82,7 +82,7 @@ class _UIState extends State<JournalPage> {
       'date': dateController.text.trim(),
       'name': nameController.text.trim(),
       'entry': entryController.text.trim(),
-      'tag': tagController.text.trim(),
+      'tag': tag,
       'uid': userInstance.currentUser!.uid
     });
     Navigator.pop(context); // Always go back to JournalListPage after saving
@@ -171,7 +171,7 @@ class _UIState extends State<JournalPage> {
       'date': dateController.text.trim(),
       'name': nameController.text.trim(),
       'entry': entryController.text.trim(),
-      'tag': tagController.text.trim(),
+      'tag': tag,
     });
       } else if (entry.isEmpty) {
         print('Entry does not exist');
@@ -351,7 +351,31 @@ class _UIState extends State<JournalPage> {
                                     hintText: 'Tag',
                                     contentPadding: EdgeInsets.symmetric(horizontal: 10.0),
                                   ),
+                                onSubmitted: (value) {
+                                  setState(() {
+                                    tag.add(value.trim());
+                                    tagController.clear();
+                                  });
+                                },
                                 ),
+                                  SizedBox(height: 8),
+                          //to display multiple tags
+                          Wrap(
+                          spacing: 4,
+                          children: tag.map((t) {
+                            return Chip(
+                              label: Text('#${t.toLowerCase()}'),
+                              deleteIcon: Icon(Icons.close),
+                              shape: StadiumBorder(side: BorderSide(color: Colors.transparent)),
+                              onDeleted: () {
+                                setState(() {
+                                  tag.remove(t);
+                                });
+                              },
+                            );
+                          }).toList(),
+                        ),
+                                
                             ],
                           ),
                         ),
