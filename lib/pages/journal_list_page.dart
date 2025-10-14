@@ -39,7 +39,7 @@ class _JournalListPageState extends State<JournalListPage> {
           initialTitle: entryDoc['name'] ?? '',
           initialDate: entryDoc['date'] ?? '',
           initialEntry: entryDoc['entry'] ?? '',
-          initialTag: (entryDoc.data() as Map<String, dynamic>)['tag'] ?? [],//requires more safety in case there are no tags
+          initialTag: List<String>.from(entryDoc['tag'] ?? []),//requires more safety in case there are no tags
           
           onSave: (title, date, entry, tag) async {
             await entryDoc.reference.update({
@@ -321,7 +321,6 @@ class _JournalListPageState extends State<JournalListPage> {
                                   ),
                                 ),
                 ],
-                
                       );
                     },
                   ),
