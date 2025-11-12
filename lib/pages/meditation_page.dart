@@ -9,6 +9,8 @@ import '../theme.dart';
 import 'package:hive/hive.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:io';
+import 'package:flutter_tts/flutter_tts.dart';
 
 class MeditationSession {
   final String name;
@@ -229,6 +231,7 @@ class _MeditationPageState extends State<MeditationPage> with SingleTickerProvid
   late Animation<double> _flameAnim;
 
   bool trackerExpanded = true;
+  late FlutterTts _tts;
 
   @override
   void initState() {
@@ -247,6 +250,28 @@ class _MeditationPageState extends State<MeditationPage> with SingleTickerProvid
       if (mounted) setState(() => _motivationIndex = (_motivationIndex + 1) % motivations.length);
     });
 
+    // init TTS
+    _tts = FlutterTts();
+    _tts.setLanguage("en-US");
+    _tts.setSpeechRate(0.45);
+    _tts.setPitch(1.0);
+    // allow mixing on iOS so music can continue while TTS speaks
+    try {
+      // call dynamically to avoid static type mismatch between plugin versions
+      // this attempts to set the iOS audio category so TTS will mix with other audio
+      ( _tts as dynamic ).setIosAudioCategory("playback", ["mixWithOthers"]);
+    } catch (_) {}
+    // resume music if TTS finishes and it paused audio on some engines
+    try {
+      (_tts as dynamic).setCompletionHandler(() {
+        try {
+          if (sessionStarted) {
+            audioPlayer.resume();
+          }
+        } catch (_) {}
+      });
+    } catch (_) {}
+
     _initStats();
   }
 
@@ -257,7 +282,23 @@ class _MeditationPageState extends State<MeditationPage> with SingleTickerProvid
     audioPlayer.dispose();
     _motivationTimer?.cancel();
     _flameController.dispose();
+    try {
+      _tts.stop();
+    } catch (_) {}
     super.dispose();
+  }
+
+  // Safe speak helper using FlutterTts
+  Future<void> _speak(String text) async {
+    if (!mounted) return;
+    if (text.trim().isEmpty) return;
+    try {
+      await _tts.stop();
+      await _tts.speak(text);
+    } catch (e) {
+      // ignore TTS errors in production
+      debugPrint('TTS error: $e');
+    }
   }
 
   // Initialize stats and history from Hive and Firebase (merge)
@@ -360,15 +401,17 @@ class _MeditationPageState extends State<MeditationPage> with SingleTickerProvid
       // Continue without audio if there's an error
     }
 
-    // Initial preparation countdown
+    // Initial preparation countdown (speak the countdown)
     for (int i = 3; i > 0; i--) {
       if (!mounted || !sessionStarted) break;
+      setState(() {
+        countdownText = "Starting in $i...";
+      });
+      // speak the countdown number
+      try {
+        await _speak("Starting in $i");
+      } catch (_) {}
       await Future.delayed(const Duration(seconds: 1));
-      if (mounted && sessionStarted) {
-        setState(() {
-          countdownText = "Starting in $i...";
-        });
-      }
     }
 
     // Wait one more second after countdown
@@ -385,8 +428,13 @@ class _MeditationPageState extends State<MeditationPage> with SingleTickerProvid
         currentPhaseIndex = 0;
       });
 
+      // announce initial phase
+      try {
+        await _speak(breathPhase);
+      } catch (_) {}
+
       // Start the breathing cycles timer
-      timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      timer = Timer.periodic(const Duration(seconds: 1), (timer) async {
         if (!mounted || !sessionStarted) {
           // Check sessionStarted, not sessionReady
           timer.cancel();
@@ -395,37 +443,54 @@ class _MeditationPageState extends State<MeditationPage> with SingleTickerProvid
 
         setState(() {
           remainingSeconds--;
+        });
 
-          // End session if time is up
-          if (remainingSeconds <= 0) {
-            timer.cancel();
+        // End session if time is up
+        if (remainingSeconds <= 0) {
+          timer.cancel();
+          setState(() {
             sessionReady = false;
             sessionStarted = false;
             audioPlayer.stop();
             countdownText = "Session Complete";
             breathPhase = "Session Complete";
-            // Update stats
-            _updateStats(selectedSession!.durationSeconds ~/ 60);
-            return;
-          }
+          });
+          try {
+            await _speak("Session complete");
+          } catch (_) {}
+          // Update stats
+          _updateStats(selectedSession!.durationSeconds ~/ 60);
+          return;
+        }
 
-          // Check if current phase is complete
-          if (phaseCounter >=
-              selectedBreathingPattern!
-                  .phases[currentPhaseIndex].durationSeconds) {
-            // Move to next phase
-            currentPhaseIndex = (currentPhaseIndex + 1) %
-                selectedBreathingPattern!.phases.length;
-            breathPhase =
-                selectedBreathingPattern!.phases[currentPhaseIndex].name;
+        // Handle phase progress and transitions
+        final currentPhase = selectedBreathingPattern!.phases[currentPhaseIndex];
+        if (phaseCounter >= currentPhase.durationSeconds) {
+          // Move to next phase
+          currentPhaseIndex = (currentPhaseIndex + 1) % selectedBreathingPattern!.phases.length;
+          final nextPhase = selectedBreathingPattern!.phases[currentPhaseIndex];
+          setState(() {
+            breathPhase = nextPhase.name;
             phaseCounter = 1; // Reset counter to 1 for new phase
             countdownText = "1"; // Update display immediately
-          } else {
-            // Continue current phase, increment counter
+          });
+          // Announce phase change
+          try {
+            await _speak(breathPhase);
+          } catch (_) {}
+        } else {
+          // Continue current phase, increment counter
+          setState(() {
             phaseCounter++;
             countdownText = phaseCounter.toString(); // Update display
+          });
+          // Speak the last 3 seconds countdown
+          if (phaseCounter <= 3) {
+            try {
+              await _speak(phaseCounter.toString());
+            } catch (_) {}
           }
-        });
+        }
       });
     }
   }
