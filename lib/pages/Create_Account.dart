@@ -61,6 +61,8 @@ class _MyCreateAccount extends State<MyCreateAccount> {
                     // Email Field
                     TextFormField(
                       controller: _emailController,
+                      style: const TextStyle(color: Colors.black),
+                      cursorColor: Colors.black,
                       decoration: const InputDecoration(
                         labelText: 'Email',
                         filled: true,
@@ -83,6 +85,8 @@ class _MyCreateAccount extends State<MyCreateAccount> {
                     // Username Field
                     TextFormField(
                       controller: _usernameController,
+                      style: const TextStyle(color: Colors.black),
+                      cursorColor: Colors.black,
                       decoration: const InputDecoration(
                         labelText: 'Display name',
                         filled: true,
@@ -102,6 +106,8 @@ class _MyCreateAccount extends State<MyCreateAccount> {
                     TextFormField(
                       controller: _birthdayController,
                       readOnly: true,
+                      style: const TextStyle(color: Colors.black),
+                      cursorColor: Colors.black,
                       decoration: const InputDecoration(
                         labelText: 'Birthday',
                         filled: true,
@@ -133,6 +139,8 @@ class _MyCreateAccount extends State<MyCreateAccount> {
                     // Password Field
                     TextFormField(
                       controller: _passwordController,
+                      style: const TextStyle(color: Colors.black),
+                      cursorColor: Colors.black,
                       decoration: const InputDecoration(
                         labelText: 'Password',
                         filled: true,
