@@ -73,6 +73,7 @@ class _JournalListPageState extends State<JournalListPage> {
               Text(entryDoc['date'] ?? '', style: TextStyle(color: Colors.grey)),
               SizedBox(height: 12),
               Text(entryDoc['entry'] ?? ''),
+              Text((entryDoc['tag'] is List)  ? (entryDoc['tag'] as List) .map((t) => '#${t.toString().trim().toLowerCase()}') .join(' ')  : '#${entryDoc['tag']?.toString() ?? ''}', style: TextStyle(fontSize: 16),  maxLines: 1,  overflow: TextOverflow.ellipsis,),
             ],
           ),
           actions: [
@@ -300,6 +301,8 @@ class _JournalListPageState extends State<JournalListPage> {
                                                       Text(entryDoc['date'] ?? '', style: TextStyle(fontSize: 15, color: dateColor)),
                                                       SizedBox(height: 6),
                                                       Text(entryDoc['entry'] ?? '', style: TextStyle(fontSize: 16, color: subTextColor), maxLines: 1, overflow: TextOverflow.ellipsis),
+                                                      SizedBox(height: 6),
+                                                      Text((entryDoc['tag'] is List)  ? (entryDoc['tag'] as List)  .map((t) => '#${t.toString().trim().toLowerCase()}')  .join(' ')  : '#${entryDoc['tag']?.toString() ?? ''}', style: TextStyle(fontSize: 16, color: subTextColor), maxLines: 1,  overflow: TextOverflow.ellipsis,),
                                                     ],
                                                   ),
                                                 ),
@@ -321,6 +324,7 @@ class _JournalListPageState extends State<JournalListPage> {
                                   ),
                                 ),
                 ],
+                
                       );
                     },
                   ),

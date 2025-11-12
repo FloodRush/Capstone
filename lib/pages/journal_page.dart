@@ -163,6 +163,11 @@ class _UIState extends State<JournalPage> {
 
     setState(() {
       int i = name.indexOf(updated.trim());
+      List<String> editedTags = tagController.text
+      .split(',')
+      .map((t) => t.trim())
+      .where((t) => t.isNotEmpty)
+      .toList();
       if (entry.isNotEmpty && i != -1) {
       /*  date[i] = dateController.text.trim();
         name[i] = nameController.text.trim();
@@ -171,7 +176,7 @@ class _UIState extends State<JournalPage> {
       'date': dateController.text.trim(),
       'name': nameController.text.trim(),
       'entry': entryController.text.trim(),
-      'tag': tag,
+      'tag': editedTags,
     });
       } else if (entry.isEmpty) {
         print('Entry does not exist');
@@ -187,7 +192,7 @@ class _UIState extends State<JournalPage> {
         if (entry.isNotEmpty && i != -1) {
           return AlertDialog(
             title: Text('Name: ${name[i]}'),
-            content: Text('Date: ${date[i]}\n\n${entry[i]}\n\n${tag}'),
+            content: Text('Date: ${date[i]}\n\n${entry[i]}\n\n#${tag[i]}'),
           );
         } else if (entry.isEmpty) {
           return AlertDialog(
