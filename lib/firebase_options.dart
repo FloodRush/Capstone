@@ -41,7 +41,7 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyCEej-vstH_ap0ZUbQqWUYbs1W0RZ48CFI',
+    apiKey:'AIzaSyDjcBebzjqy6__1Q-HUn-as9MpNwzMWMmk',
     appId: '1:287791746485:web:3258b4878d750298325dfc',
     messagingSenderId: '287791746485',
     projectId: 'firebasecapstone',
@@ -76,7 +76,7 @@ class DefaultFirebaseOptions {
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyCEej-vstH_ap0ZUbQqWUYbs1W0RZ48CFI',
+    apiKey: 'AIzaSyDjcBebzjqy6__1Q-HUn-as9MpNwzMWMmk',
     appId: '1:287791746485:web:2195015cfe942582325dfc',
     messagingSenderId: '287791746485',
     projectId: 'firebasecapstone',
