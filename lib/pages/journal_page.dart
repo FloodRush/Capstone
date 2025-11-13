@@ -87,7 +87,7 @@ class _UIState extends State<JournalPage> {
     });
     Navigator.pop(context); // Always go back to JournalListPage after saving
   }
-
+/*
   void delete(String deleted) {
     int i = name.indexOf(deleted.trim());
 //for the popup
@@ -208,10 +208,10 @@ class _UIState extends State<JournalPage> {
       },
     );
   }
-
+*/
   @override
   Widget build(BuildContext context) {
-    int _currentIndex = 1;
+    int currentIndex = 1;
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -418,7 +418,7 @@ class _UIState extends State<JournalPage> {
         ),
         child: BottomNavigationBar(
           type: BottomNavigationBarType.fixed,
-          currentIndex: _currentIndex,
+          currentIndex: currentIndex,
           backgroundColor: Colors.transparent,
           elevation: 0,
           selectedItemColor: AppColors.darkPink,
@@ -457,3 +457,4 @@ class _UIState extends State<JournalPage> {
     );
   }
 }
+
