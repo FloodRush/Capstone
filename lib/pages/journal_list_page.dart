@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'journal_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -23,7 +21,7 @@ class _JournalListPageState extends State<JournalListPage> {
       .snapshots();
   }
 
-  void _addEntry() async {
+  void addEntry() async {
     await Navigator.push(
       context,
       MaterialPageRoute(builder: (context) => JournalPage()),
@@ -31,7 +29,25 @@ class _JournalListPageState extends State<JournalListPage> {
     setState(() {}); // Refresh after add
   }
 
-  void _editEntry(DocumentSnapshot entryDoc) async {
+  void viewEntry(DocumentSnapshot entryDoc) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Name: ${entryDoc['name'] ?? ''}'),
+          content: Text(
+            'Date: ${entryDoc['date'] ?? ''}\n\n'
+            '${entryDoc['entry'] ?? ''}\n\n'
+            '#${(entryDoc['tag'] is List)
+                ? (entryDoc['tag'] as List).join(', ')
+                : entryDoc['tag']?.toString() ?? ''}',
+          ),
+        );
+      },
+    );
+  }
+
+  void editEntry(DocumentSnapshot entryDoc) async {
     await Navigator.push(
       context,
       MaterialPageRoute(
@@ -39,8 +55,7 @@ class _JournalListPageState extends State<JournalListPage> {
           initialTitle: entryDoc['name'] ?? '',
           initialDate: entryDoc['date'] ?? '',
           initialEntry: entryDoc['entry'] ?? '',
-          initialTag: List<String>.from(entryDoc['tag'] ?? []),//requires more safety in case there are no tags
-          
+          initialTag: List<String>.from(entryDoc['tag'] ?? []),
           onSave: (title, date, entry, tag) async {
             await entryDoc.reference.update({
               'name': title,
@@ -52,42 +67,40 @@ class _JournalListPageState extends State<JournalListPage> {
         ),
       ),
     );
-    setState(() {}); // Refresh after edit
+    setState(() {});
   }
 
-  void _deleteEntry(DocumentSnapshot entryDoc) async {
-    await entryDoc.reference.delete();
-    setState(() {}); // Refresh after delete
-  }
-
-  void _viewEntry(DocumentSnapshot entryDoc) {
-    showDialog(
+  void deleteEntry(DocumentSnapshot entryDoc) async {
+    final confirm = await showDialog<bool>(
       context: context,
-      builder: (context) {
+      builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(entryDoc['name'] ?? ''),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(entryDoc['date'] ?? '', style: TextStyle(color: Colors.grey)),
-              SizedBox(height: 12),
-              Text(entryDoc['entry'] ?? ''),
-              Text((entryDoc['tag'] is List)  ? (entryDoc['tag'] as List) .map((t) => '#${t.toString().trim().toLowerCase()}') .join(' ')  : '#${entryDoc['tag']?.toString() ?? ''}', style: TextStyle(fontSize: 16),  maxLines: 1,  overflow: TextOverflow.ellipsis,),
-            ],
-          ),
+          title: Text('Delete Entry'),
+          content: Text('Are you sure you want to delete "${entryDoc['name']}"?'),
           actions: [
             TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text('Close'),
+              onPressed: () => Navigator.pop(context, false),
+              child: Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: Text('Delete'),
             ),
           ],
         );
       },
     );
+
+    if (confirm == true) {
+      await entryDoc.reference.delete();
+      setState(() {});
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Entry deleted')),
+      );
+    }
   }
 
-  void _selectAll(List<DocumentSnapshot> docs) {
+  void selectAll(List<DocumentSnapshot> docs) {
     setState(() {
       selected = docs.map((d) => d.id).toSet();
     });
@@ -105,11 +118,11 @@ class _JournalListPageState extends State<JournalListPage> {
       onWillPop: () async {
         if (Navigator.of(context).canPop()) return true;
         if (widget.onBackToHome != null) {
-          debugPrint('Journal back: onBackToHome fired (tab mode)');
+          debugPrint('Journal back: onBackToHome fired tab mode');
           widget.onBackToHome!();
           return false;
         }
-        debugPrint('Journal back: no route to pop and onBackToHome==null');
+        debugPrint('Journal back: no route to pop and onBackToHome is null');
         return true;
       },
       child: Scaffold(
@@ -140,10 +153,10 @@ class _JournalListPageState extends State<JournalListPage> {
                           if (Navigator.of(context).canPop()) {
                             Navigator.of(context).pop();
                           } else if (widget.onBackToHome != null) {
-                            debugPrint('Journal back: onBackToHome fired (tab mode)');
+                            debugPrint('Journal back: onBackToHome fired tab mode');
                             widget.onBackToHome!();
                           } else {
-                            debugPrint('Journal back: no route to pop and onBackToHome==null');
+                            debugPrint('Journal back: no route to pop and onBackToHome is null');
                           }
                         },
                       ),
@@ -159,7 +172,7 @@ class _JournalListPageState extends State<JournalListPage> {
                     ],
                   ),
                 ),
-                // --- Original body rent below ---
+                //Original body rent below
                 Expanded(
                   child: StreamBuilder<QuerySnapshot>(
                     stream: getEntriesStream(),
@@ -206,7 +219,7 @@ class _JournalListPageState extends State<JournalListPage> {
                               IconButton(
                                 icon: Icon(Icons.add_circle_outline, size: 32, color: isDark ? Colors.white : Colors.black),
                                 tooltip: 'Add',
-                                onPressed: _addEntry,
+                                onPressed: addEntry,
                               ),
                               SizedBox(width: 18),
                               IconButton(
@@ -215,7 +228,7 @@ class _JournalListPageState extends State<JournalListPage> {
                                 onPressed: selected.isNotEmpty
                                     ? () {
                                         for (var id in selected) {
-                                          _deleteEntry(docs.firstWhere((d) => d.id == id));
+                                          deleteEntry(docs.firstWhere((d) => d.id == id));
                                         }
                                         selected.clear();
                                       }
@@ -226,7 +239,7 @@ class _JournalListPageState extends State<JournalListPage> {
                                 icon: Icon(Icons.edit_outlined, size: 32, color: isDark ? Colors.white : Colors.black),
                                 tooltip: 'Edit',
                                 onPressed: selected.length == 1
-                                    ? () => _editEntry(docs.firstWhere((d) => selected.contains(d.id)))
+                                    ? () => editEntry(docs.firstWhere((d) => selected.contains(d.id)))
                                     : null,
                               ),
                               SizedBox(width: 18),
@@ -234,14 +247,14 @@ class _JournalListPageState extends State<JournalListPage> {
                                 icon: Icon(Icons.remove_red_eye_outlined, size: 32, color: isDark ? Colors.white : Colors.black),
                                 tooltip: 'View',
                                 onPressed: selected.length == 1
-                                    ? () => _viewEntry(docs.firstWhere((d) => selected.contains(d.id)))
+                                    ? () => viewEntry(docs.firstWhere((d) => selected.contains(d.id)))
                                     : null,
                               ),
                               SizedBox(width: 18),
                               IconButton(
                                 icon: Icon(Icons.select_all, size: 32, color: isDark ? Colors.white : Colors.black),
                                 tooltip: 'Select All',
-                                onPressed: docs.isNotEmpty ? () => _selectAll(docs) : null,
+                                onPressed: docs.isNotEmpty ? () => selectAll(docs) : null,
                               ),
                             ],
                           ),
