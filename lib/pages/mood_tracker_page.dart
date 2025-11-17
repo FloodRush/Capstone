@@ -74,40 +74,45 @@ class _MoodTrackerPageState extends State<MoodTrackerPage> {
       context: context,
       builder: (context) {
         List<String> tempSelected = List.from(_getMoodsForDay(day));
-        return AlertDialog(
-          title: const Text('How did today make you feel?'),
-          content: SingleChildScrollView(
-            child: Column(
-              children: emotionList.map((emotion) {
-                final isSelected = tempSelected.contains(emotion);
-                return CheckboxListTile(
-                  title: Text(emotion),
-                  value: isSelected,
-                  onChanged: (checked) {
-                    setState(() {
-                      if (checked == true) {
-                        if (tempSelected.length < 3) {
-                          tempSelected.add(emotion);
-                        }
-                      } else {
-                        tempSelected.remove(emotion);
-                      }
-                    });
-                  },
-                );
-              }).toList(),
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, null),
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () => Navigator.pop(context, tempSelected),
-              child: const Text('Save'),
-            ),
-          ],
+        return StatefulBuilder(
+          builder: (context, setStateDialog) {
+            return AlertDialog(
+              title: const Text('How did today make you feel?'),
+              content: SingleChildScrollView(
+                child: Column(
+                  children: emotionList.map((emotion) {
+                    final isSelected = tempSelected.contains(emotion);
+                    return CheckboxListTile(
+                      title: Text(emotion),
+                      value: isSelected,
+                      onChanged: (checked) {
+                        // Use dialog-local setState so UI updates immediately inside the dialog
+                        setStateDialog(() {
+                          if (checked == true) {
+                            if (tempSelected.length < 3) {
+                              tempSelected.add(emotion);
+                            }
+                          } else {
+                            tempSelected.remove(emotion);
+                          }
+                        });
+                      },
+                    );
+                  }).toList(),
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context, null),
+                  child: const Text('Cancel'),
+                ),
+                ElevatedButton(
+                  onPressed: () => Navigator.pop(context, tempSelected),
+                  child: const Text('Save'),
+                ),
+              ],
+            );
+          },
         );
       },
     );

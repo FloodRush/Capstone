@@ -118,11 +118,11 @@ class _MyCreateAccount extends State<MyCreateAccount> {
                       onTap: () async {
                         DateTime? pickedDate = await showDatePicker(
                           context: context,
-                          initialDate: DateTime(2007),
+                              initialDate: DateTime(2007),
                           firstDate: DateTime(1900),
                           lastDate: DateTime.now(),
                         );
-                        if (pickedDate != null) {
+                         if (pickedDate != null) {
                           _birthdayController.text =
                               pickedDate.toLocal().toString().split(' ')[0];
                         }
