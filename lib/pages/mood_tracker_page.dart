@@ -236,7 +236,8 @@ class _MoodTrackerPageState extends State<MoodTrackerPage> {
         centerTitle: true,
         backgroundColor:
             themeProvider.isDarkMode ? AppColors.mediumPurple : AppColors.lightPink,
-        foregroundColor: Colors.white,
+        // Use black text/icons on light mode so the title is visible against the pink background
+        foregroundColor: themeProvider.isDarkMode ? Colors.white : Colors.black,
       ),
       body: Column(
         children: [
