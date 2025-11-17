@@ -61,15 +61,17 @@ class _UIState extends State<JournalPage> {
 
   void add() {
     if (widget.onSave != null) {
-      // Editing: only call the callback, do not add a new entry
-      widget.onSave!(nameController.text.trim(), dateController.text.trim(), entryController.text.trim(), tagController.text.split(',')
+      // Editing only call the callback, do not add a new entry
+      final List<String> cleanTags = [...tag, ...tagController.text .split(',')  .map((t) => t.trim()) .where((t) => t.isNotEmpty),].toSet().toList(); //removes duplicates
+
+      widget.onSave!(nameController.text.trim(), dateController.text.trim(), entryController.text.trim(), cleanTags
       .map((t) => t.trim())
       .where((t) => t.isNotEmpty)
       .toList());
       Navigator.pop(context);
       return;
     }
-    // Adding: create a new entry in Firestore
+    // Adding create a new entry in Firestore
     setState(() {
       date.add(dateController.text.trim());
       name.add(nameController.text.trim());
@@ -82,133 +84,14 @@ class _UIState extends State<JournalPage> {
       'date': dateController.text.trim(),
       'name': nameController.text.trim(),
       'entry': entryController.text.trim(),
-      'tag': tag,
+      //... is the spread operator
+      'tag': [...tag, ...tagController.text.split(',').map((t) => t.trim()).where((t) => t.isNotEmpty)].toSet().toList(),
+
       'uid': userInstance.currentUser!.uid
     });
     Navigator.pop(context); // Always go back to JournalListPage after saving
   }
-/*
-  void delete(String deleted) {
-    int i = name.indexOf(deleted.trim());
-//for the popup
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        if (entry.isNotEmpty && i != -1) {
-          return AlertDialog(
-            title: Text('Select Entry'),
-            content: SizedBox(
-              height: 30,
-              width: 200,
-              child: TextField(
-                controller: nameController,
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                  hintText: '',
-                  contentPadding: EdgeInsets.symmetric(horizontal: 10.0),
-                ),
-              ),
-            ),
-          );
-        } else {
-          return SizedBox.shrink();
-        }
-      },
-    );
 
-    setState(() {
-      if (entry.isNotEmpty && i != -1) {
-        /*name.removeAt(i);
-        date.removeAt(i);
-        entry.removeAt(i);*/
-        //updates the entry for the current user
-      database.doc(userInstance.currentUser!.uid).update({
-      'date': FieldValue.delete(),
-      'name': FieldValue.delete(),
-      'entry': FieldValue.delete(),  
-      'tag': FieldValue.delete(),  
-    });
-        print('Entry does not exist');
-      }
-    });
-  }
-
-  void update(String updated) {
-    int i = name.indexOf(updated.trim());
-    //for the popup
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        if (entry.isNotEmpty && i != -1) {
-          return AlertDialog(
-            title: Text('Select Entry'),
-            content: SizedBox(
-              height: 30,
-              width: 200,
-              child: TextField(
-                controller: nameController,
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                  hintText: '',
-                  contentPadding: EdgeInsets.symmetric(horizontal: 10.0),
-                ),
-              ),
-            ),
-          );
-        } else {
-          return SizedBox.shrink();
-        }
-      },
-    );
-
-    setState(() {
-      int i = name.indexOf(updated.trim());
-      List<String> editedTags = tagController.text
-      .split(',')
-      .map((t) => t.trim())
-      .where((t) => t.isNotEmpty)
-      .toList();
-      if (entry.isNotEmpty && i != -1) {
-      /*  date[i] = dateController.text.trim();
-        name[i] = nameController.text.trim();
-        entry[i] = entryController.text.trim();*/
-              database.doc(userInstance.currentUser!.uid).update({
-      'date': dateController.text.trim(),
-      'name': nameController.text.trim(),
-      'entry': entryController.text.trim(),
-      'tag': editedTags,
-    });
-      } else if (entry.isEmpty) {
-        print('Entry does not exist');
-      }
-    });
-  }
-//view function to view journal entries
-  void view(String viewed) {
-    int i = name.indexOf(viewed.trim());
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        if (entry.isNotEmpty && i != -1) {
-          return AlertDialog(
-            title: Text('Name: ${name[i]}'),
-            content: Text('Date: ${date[i]}\n\n${entry[i]}\n\n#${tag[i]}'),
-          );
-        } else if (entry.isEmpty) {
-          return AlertDialog(
-            title: Text('Error'),
-            content: Text('Entry does not exist'),
-          );
-        } else {
-          return AlertDialog(
-            title: Text('Invalid'),
-            content: Text('Invalid index'),
-          );
-        }
-      },
-    );
-  }
-*/
   @override
   Widget build(BuildContext context) {
     int currentIndex = 1;
@@ -457,4 +340,3 @@ class _UIState extends State<JournalPage> {
     );
   }
 }
-
