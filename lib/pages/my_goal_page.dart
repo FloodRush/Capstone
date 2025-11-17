@@ -306,6 +306,18 @@ class _MyGoalPageState extends State<MyGoalPage> {
         backgroundColor: isDark ? Colors.black : backgroundPink,
         elevation: 0,
         centerTitle: true,
+        // Add a leading back/home button so users can always go back to the previous
+        // screen or call the provided onBackToHome callback when no back stack exists.
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: isDark ? Colors.white : Colors.black),
+          onPressed: () {
+            if (Navigator.canPop(context)) {
+              Navigator.pop(context);
+            } else if (widget.onBackToHome != null) {
+              widget.onBackToHome!();
+            }
+          },
+        ),
         title: Text(
           DateFormat('MMMM dd, yyyy').format(_selectedDay!),
           style: TextStyle(
