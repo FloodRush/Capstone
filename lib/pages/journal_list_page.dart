@@ -26,7 +26,8 @@ class _JournalListPageState extends State<JournalListPage> {
       context,
       MaterialPageRoute(builder: (context) => JournalPage()),
     );
-    setState(() {}); // Refresh after add
+    
+    setState(() {}); //Refresh after add
   }
 
   void viewEntry(DocumentSnapshot entryDoc) {
@@ -36,8 +37,8 @@ class _JournalListPageState extends State<JournalListPage> {
         return AlertDialog(
           title: Text('Name: ${entryDoc['name'] ?? ''}'),
           content: Text(
-            'Date: ${entryDoc['date'] ?? ''}\n\n'
-            '${entryDoc['entry'] ?? ''}\n\n'
+            'Date: ${entryDoc['date'] ?? ''}\n'
+            '${entryDoc['entry'] ?? ''}\n'
             '#${(entryDoc['tag'] is List)
                 ? (entryDoc['tag'] as List).join(', ')
                 : entryDoc['tag']?.toString() ?? ''}',
@@ -55,7 +56,11 @@ class _JournalListPageState extends State<JournalListPage> {
           initialTitle: entryDoc['name'] ?? '',
           initialDate: entryDoc['date'] ?? '',
           initialEntry: entryDoc['entry'] ?? '',
-          initialTag: List<String>.from(entryDoc['tag'] ?? []),
+          initialTag: (entryDoc['tag'] is List) ? List<String>.from(entryDoc['tag'])
+        : (entryDoc['tag'] is String && entryDoc['tag'].toString().trim().isNotEmpty)
+        ? entryDoc['tag'].toString().split(',').map((e) => e.trim()).toList()
+        : [],
+
           onSave: (title, date, entry, tag) async {
             await entryDoc.reference.update({
               'name': title,
@@ -70,35 +75,41 @@ class _JournalListPageState extends State<JournalListPage> {
     setState(() {});
   }
 
-  void deleteEntry(DocumentSnapshot entryDoc) async {
-    final confirm = await showDialog<bool>(
+void deleteEntry(DocumentSnapshot entryDoc) async {
+  final confirm = await showDialog<bool>(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text('Delete Entry'),
+        content: Text('Are you sure you want to delete "${entryDoc['name']}"?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: Text('Delete'),
+          ),
+        ],
+      );
+    },
+  );
+
+  if (confirm == true) {
+    await entryDoc.reference.delete();
+    setState(() {});
+
+    showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text('Delete Entry'),
-          content: Text('Are you sure you want to delete "${entryDoc['name']}"?'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () => Navigator.pop(context, true),
-              child: Text('Delete'),
-            ),
-          ],
+          content: Text('Entry deleted'),
         );
       },
     );
-
-    if (confirm == true) {
-      await entryDoc.reference.delete();
-      setState(() {});
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Entry deleted')),
-      );
-    }
   }
+}
 
   void selectAll(List<DocumentSnapshot> docs) {
     setState(() {
@@ -179,7 +190,7 @@ class _JournalListPageState extends State<JournalListPage> {
                     builder: (context, snapshot) {
                       final docs = snapshot.data?.docs ?? [];
                       bool hasEntries = docs.isNotEmpty;
-                  
+                //For the future search function 
                 /*return Column(
                   children: [
                     Container(
