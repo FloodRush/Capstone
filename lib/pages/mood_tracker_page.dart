@@ -4,6 +4,8 @@ import 'package:project/providers/theme_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:awesome_notifications/awesome_notifications.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class MoodTrackerPage extends StatefulWidget {
   const MoodTrackerPage({super.key});
@@ -22,6 +24,8 @@ class _MoodTrackerPageState extends State<MoodTrackerPage> {
   ];
 
   Map<String, bool> _checkedActivities = {};
+
+  String _userId = '';
 
   final Map<String, int> moodActivities = {
     'Happy': -3,
@@ -141,6 +145,62 @@ class _MoodTrackerPageState extends State<MoodTrackerPage> {
           _checkedActivities[act] = false;
         }
       });
+      // persist the updated moods for this user
+      _saveAllMoodEntriesToFirestore();
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    // load existing mood entries for the current user (if any)
+    final user = FirebaseAuth.instance.currentUser;
+    _userId = user?.uid ?? '';
+    if (_userId.isNotEmpty) {
+      _loadMoodEntriesFromFirestore();
+    }
+  }
+
+  Future<void> _loadMoodEntriesFromFirestore() async {
+    if (_userId.isEmpty) return;
+    try {
+      final doc = await FirebaseFirestore.instance.collection('MoodEntries').doc(_userId).get();
+      if (!doc.exists) return;
+      final data = doc.data();
+      if (data == null) return;
+      final Map<String, dynamic>? entries = (data['entries'] as Map<String, dynamic>?) ;
+      if (entries == null) return;
+      final Map<DateTime, List<String>> loaded = {};
+      entries.forEach((key, value) {
+        try {
+          // keys stored as ISO date string YYYY-MM-DD
+          final dt = DateTime.parse(key);
+          loaded[DateTime.utc(dt.year, dt.month, dt.day)] = List<String>.from(value as List);
+        } catch (_) {}
+      });
+      setState(() {
+        _moodEntries = loaded;
+      });
+    } catch (e) {
+      // ignore load errors for now
+      debugPrint('Error loading mood entries: $e');
+    }
+  }
+
+  Future<void> _saveAllMoodEntriesToFirestore() async {
+    if (_userId.isEmpty) return;
+    try {
+      final Map<String, List<String>> serialized = {};
+      _moodEntries.forEach((date, list) {
+        final key = date.toIso8601String().split('T')[0];
+        serialized[key] = list;
+      });
+      await FirebaseFirestore.instance.collection('MoodEntries').doc(_userId).set({
+        'entries': serialized,
+        'updatedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+    } catch (e) {
+      debugPrint('Error saving mood entries: $e');
     }
   }
   
@@ -168,7 +228,7 @@ class _MoodTrackerPageState extends State<MoodTrackerPage> {
   @override
   Widget build(BuildContext context) {
     final themeProvider = Provider.of<ThemeProvider>(context);
-    final selectedMoods = _getMoodsForDay(_selectedDay);
+  // current selected moods for UI (loaded from _moodEntries when needed)
 
     return Scaffold(
       appBar: AppBar(
