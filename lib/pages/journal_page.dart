@@ -2,6 +2,10 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import '../pages/Create_Account.dart';
 import 'package:project/theme.dart';
 
@@ -41,6 +45,7 @@ class _UIState extends State<JournalPage> {
   final user = FirebaseAuth.instance.currentUser;
   final db = FirebaseFirestore.instance;
   late CollectionReference database;
+
   @override
   void initState() {
     super.initState();
@@ -53,21 +58,28 @@ class _UIState extends State<JournalPage> {
     if (widget.initialDate != null) dateController.text = widget.initialDate!;
     if (widget.initialEntry != null) entryController.text = widget.initialEntry!;
     if (widget.initialTag != null) {
-    tag = widget.initialTag! ?? [];
-    tagController.text = tag.join(', ');
+      tag = widget.initialTag!;
+      tagController.text = tag.join(', ');
     }
   }
-
 
   void add() {
     if (widget.onSave != null) {
       // Editing only call the callback, do not add a new entry
-      final List<String> cleanTags = [...tag, ...tagController.text .split(',')  .map((t) => t.trim()) .where((t) => t.isNotEmpty),].toSet().toList(); //removes duplicates
+      final List<String> cleanTags = [
+        ...tag,
+        ...tagController.text
+            .split(',')
+            .map((t) => t.trim())
+            .where((t) => t.isNotEmpty),
+      ].toSet().toList(); // removes duplicates
 
-      widget.onSave!(nameController.text.trim(), dateController.text.trim(), entryController.text.trim(), cleanTags
-      .map((t) => t.trim())
-      .where((t) => t.isNotEmpty)
-      .toList());
+      widget.onSave!(
+        nameController.text.trim(),
+        dateController.text.trim(),
+        entryController.text.trim(),
+        cleanTags.map((t) => t.trim()).where((t) => t.isNotEmpty).toList(),
+      );
       Navigator.pop(context);
       return;
     }
@@ -76,17 +88,18 @@ class _UIState extends State<JournalPage> {
       date.add(dateController.text.trim());
       name.add(nameController.text.trim());
       entry.add(entryController.text.trim());
-      //tag.add(tagController.text.trim());
     });
-    FirebaseFirestore.instance
-        .collection("Entries")
-        .add({
+    FirebaseFirestore.instance.collection("Entries").add({
       'date': dateController.text.trim(),
       'name': nameController.text.trim(),
       'entry': entryController.text.trim(),
-      //... is the spread operator
-      'tag': [...tag, ...tagController.text.split(',').map((t) => t.trim()).where((t) => t.isNotEmpty)].toSet().toList(),
-
+      'tag': [
+        ...tag,
+        ...tagController.text
+            .split(',')
+            .map((t) => t.trim())
+            .where((t) => t.isNotEmpty)
+      ].toSet().toList(),
       'uid': userInstance.currentUser!.uid
     });
     Navigator.pop(context); // Always go back to JournalListPage after saving
@@ -95,27 +108,32 @@ class _UIState extends State<JournalPage> {
   @override
   Widget build(BuildContext context) {
     int currentIndex = 1;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Color(0xFFE7BDF0),
-              Color(0xFFF7C7D7),
-              Color(0xFFD6EAF8),
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+          gradient: isDark
+              ? null
+              : const LinearGradient(
+                  colors: [
+                    Color(0xFFE7BDF0),
+                    Color(0xFFF7C7D7),
+                    Color(0xFFD6EAF8),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+          color: isDark ? const Color(0xFF121212) : null,
         ),
         child: SafeArea(
           child: Column(
             children: [
-              SizedBox(height: 32),
+              const SizedBox(height: 32),
               Row(
                 children: [
                   IconButton(
-                    icon: Icon(Icons.arrow_back),
+                    icon: Icon(Icons.arrow_back, color: isDark ? Colors.white : Colors.black),
                     onPressed: () => Navigator.pop(context),
                   ),
                   Expanded(
@@ -125,12 +143,12 @@ class _UIState extends State<JournalPage> {
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 28,
-                          color: Colors.black,
+                          color: isDark ? Colors.white : Colors.black,
                         ),
                       ),
                     ),
                   ),
-                  SizedBox(width: 48), // For symmetry
+                  const SizedBox(width: 48), // For symmetry
                 ],
               ),
               Expanded(
@@ -141,143 +159,153 @@ class _UIState extends State<JournalPage> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Container(
-                          padding: EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-                          margin: EdgeInsets.only(bottom: 18),
+                          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                          margin: const EdgeInsets.only(bottom: 18),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: isDark ? Colors.grey[850] : Colors.white,
                             borderRadius: BorderRadius.circular(22),
-                            boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 12, offset: Offset(0, 2))],
+                            boxShadow: const [
+                              BoxShadow(color: Colors.black12, blurRadius: 12, offset: Offset(0, 2))
+                            ],
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('Date', style: TextStyle(fontWeight: FontWeight.w500)),
-                              SizedBox(height: 8),
+                              const Text('Date', style: TextStyle(fontWeight: FontWeight.w500)),
+                              const SizedBox(height: 8),
                               TextField(
                                 controller: dateController,
                                 readOnly: true,
                                 keyboardType: TextInputType.datetime,
                                 onTap: () async {
-                                final DateTime? pickedDate = await showDatePicker(
-                                  context: context,
-                                  initialDate: startDate,
-                                  firstDate: DateTime(2025),
-                                  lastDate: DateTime(2100),
-                                );
+                                  final DateTime? pickedDate = await showDatePicker(
+                                    context: context,
+                                    initialDate: startDate,
+                                    firstDate: DateTime(2025),
+                                    lastDate: DateTime(2100),
+                                  );
 
-                                if (pickedDate != null) {
-                                  setState(() {
-                                    startDate = pickedDate;
-                                    dateController.text =
-                                        "${pickedDate.year}/${pickedDate.month}/${pickedDate.day}";
-                                  });
-                                }
+                                  if (pickedDate != null) {
+                                    setState(() {
+                                      startDate = pickedDate;
+                                      dateController.text =
+                                          "${pickedDate.year}/${pickedDate.month}/${pickedDate.day}";
+                                    });
+                                  }
                                 },
-                                decoration: InputDecoration(
-                                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                                decoration: const InputDecoration(
+                                  border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(16))),
                                   hintText: 'Date',
                                   contentPadding: EdgeInsets.symmetric(horizontal: 10.0),
                                 ),
+                                style: TextStyle(color: isDark ? Colors.white : Colors.black),
                               ),
                             ],
                           ),
                         ),
                         Container(
-                          padding: EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-                          margin: EdgeInsets.only(bottom: 18),
+                          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                          margin: const EdgeInsets.only(bottom: 18),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: isDark ? Colors.grey[850] : Colors.white,
                             borderRadius: BorderRadius.circular(22),
-                            boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 12, offset: Offset(0, 2))],
+                            boxShadow: const [
+                              BoxShadow(color: Colors.black12, blurRadius: 12, offset: Offset(0, 2))
+                            ],
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('Title', style: TextStyle(fontWeight: FontWeight.w500)),
-                              SizedBox(height: 8),
+                              const Text('Title', style: TextStyle(fontWeight: FontWeight.w500)),
+                              const SizedBox(height: 8),
                               TextField(
                                 controller: nameController,
-                                decoration: InputDecoration(
-                                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                                decoration: const InputDecoration(
+                                  border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(16))),
                                   hintText: 'Title',
                                   contentPadding: EdgeInsets.symmetric(horizontal: 10.0),
                                 ),
+                                style: TextStyle(color: isDark ? Colors.white : Colors.black),
                               ),
                             ],
                           ),
                         ),
                         Container(
                           height: 280, // Increased height for the whole Entry box
-                          padding: EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-                          margin: EdgeInsets.only(bottom: 18),
+                          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+                          margin: const EdgeInsets.only(bottom: 18),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: isDark ? Colors.grey[850] : Colors.white,
                             borderRadius: BorderRadius.circular(22),
-                            boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 12, offset: Offset(0, 2))],
+                            boxShadow: const [
+                              BoxShadow(color: Colors.black12, blurRadius: 12, offset: Offset(0, 2))
+                            ],
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('Entry', style: TextStyle(fontWeight: FontWeight.w500)),
-                              SizedBox(height: 8),
+                              const Text('Entry', style: TextStyle(fontWeight: FontWeight.w500)),
+                              const SizedBox(height: 8),
                               Expanded(
                                 child: TextField(
                                   controller: entryController,
                                   maxLines: 30, // Input starts from the top
-                                  decoration: InputDecoration(
-                                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+                                  decoration: const InputDecoration(
+                                    border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(16))),
                                     hintText: 'How are you feeling?',
                                     contentPadding: EdgeInsets.symmetric(horizontal: 10.0, vertical: 12.0),
                                   ),
+                                  style: TextStyle(color: isDark ? Colors.white : Colors.black),
                                 ),
-                                
                               ),
-                               TextField(
-                                  controller: tagController,
-                                  decoration: InputDecoration(
-                                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
-                                    hintText: 'Tag',
-                                    contentPadding: EdgeInsets.symmetric(horizontal: 10.0),
-                                  ),
+                              const SizedBox(height: 8),
+                              TextField(
+                                controller: tagController,
+                                decoration: const InputDecoration(
+                                  border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(16))),
+                                  hintText: 'Tag',
+                                  contentPadding: EdgeInsets.symmetric(horizontal: 10.0),
+                                ),
                                 onSubmitted: (value) {
                                   setState(() {
                                     tag.add(value.trim());
                                     tagController.clear();
                                   });
                                 },
-                                ),
-                                  SizedBox(height: 8),
-                          //to display multiple tags
-                          Wrap(
-                          spacing: 4,
-                          children: tag.map((t) {
-                            return Chip(
-                              label: Text('#${t.toLowerCase()}'),
-                              deleteIcon: Icon(Icons.close),
-                              shape: StadiumBorder(side: BorderSide(color: Colors.transparent)),
-                              onDeleted: () {
-                                setState(() {
-                                  tag.remove(t);
-                                });
-                              },
-                            );
-                          }).toList(),
-                        ),
-                                
+                                style: TextStyle(color: isDark ? Colors.white : Colors.black),
+                              ),
+                              const SizedBox(height: 8),
+                              // to display multiple tags
+                              Wrap(
+                                spacing: 4,
+                                children: tag.map((t) {
+                                  return Chip(
+                                    label: Text('#${t.toLowerCase()}', style: TextStyle(color: isDark ? Colors.white : Colors.black)),
+                                    deleteIcon: const Icon(Icons.close),
+                                    shape: const StadiumBorder(side: BorderSide(color: Colors.transparent)),
+                                    onDeleted: () {
+                                      setState(() {
+                                        tag.remove(t);
+                                      });
+                                    },
+                                  );
+                                }).toList(),
+                              ),
                             ],
                           ),
                         ),
-                        SizedBox(height: 18),
+                        const SizedBox(height: 18),
                         ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.hotPink,
+                            // Use the dark theme purple to match other pages in dark mode
+                            backgroundColor: isDark ? AppColors.mediumPurple : AppColors.hotPink,
                             foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
                             elevation: 2,
-                            padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
                           ),
                           onPressed: add,
-                          child: Text('Save Entry', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500)),
+                          child: const Text('Save Entry', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500)),
                         ),
                       ],
                     ),
@@ -290,8 +318,8 @@ class _UIState extends State<JournalPage> {
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: AppColors.lightPink,
-          boxShadow: [
+          color: isDark ? Colors.grey[900] : AppColors.lightPink,
+          boxShadow: const [
             BoxShadow(
               color: Colors.black12,
               blurRadius: 8,
@@ -305,7 +333,7 @@ class _UIState extends State<JournalPage> {
           backgroundColor: Colors.transparent,
           elevation: 0,
           selectedItemColor: AppColors.darkPink,
-          unselectedItemColor: const Color.fromARGB(255, 21, 21, 21),
+          unselectedItemColor: isDark ? Colors.white70 : const Color.fromARGB(255, 21, 21, 21),
           onTap: (index) {
             if (index == 0) Navigator.pushReplacementNamed(context, '/home');
             if (index == 1) Navigator.pushReplacementNamed(context, '/journal');
@@ -313,7 +341,7 @@ class _UIState extends State<JournalPage> {
             if (index == 3) Navigator.pushReplacementNamed(context, '/quotes');
             if (index == 4) Navigator.pushReplacementNamed(context, '/meditate');
           },
-          items: [
+          items: const [
             BottomNavigationBarItem(
               icon: Icon(Icons.home),
               label: "Home",
