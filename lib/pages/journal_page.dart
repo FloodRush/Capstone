@@ -112,19 +112,10 @@ class _UIState extends State<JournalPage> {
 
     return Scaffold(
       body: Container(
+        // Use the centralized app gradient which returns a purple gradient in dark mode
+        // and the pink gradient in light mode so the Journal page matches other pages.
         decoration: BoxDecoration(
-          gradient: isDark
-              ? null
-              : const LinearGradient(
-                  colors: [
-                    Color(0xFFE7BDF0),
-                    Color(0xFFF7C7D7),
-                    Color(0xFFD6EAF8),
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-          color: isDark ? const Color(0xFF121212) : null,
+          gradient: appGradientBackground(isDark: isDark),
         ),
         child: SafeArea(
           child: Column(
@@ -318,7 +309,8 @@ class _UIState extends State<JournalPage> {
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: isDark ? Colors.grey[900] : AppColors.lightPink,
+          // Use the mediumPurple in dark mode to match other pages
+          color: isDark ? AppColors.mediumPurple : AppColors.lightPink,
           boxShadow: const [
             BoxShadow(
               color: Colors.black12,

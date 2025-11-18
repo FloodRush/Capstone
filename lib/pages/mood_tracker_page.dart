@@ -81,18 +81,24 @@ class _MoodTrackerPageState extends State<MoodTrackerPage> {
     final selectedMoods = await showDialog<List<String>>(
       context: context,
       builder: (context) {
+        final isDark = Theme.of(context).brightness == Brightness.dark;
         List<String> tempSelected = List.from(_getMoodsForDay(day));
         return StatefulBuilder(
           builder: (context, setStateDialog) {
             return AlertDialog(
-              title: const Text('How did today make you feel?'),
+              backgroundColor: isDark ? AppColors.mediumPurple : null,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              title: Text('How did today make you feel?', style: TextStyle(color: isDark ? AppColors.darkText : Colors.black)),
               content: SingleChildScrollView(
                 child: Column(
                   children: emotionList.map((emotion) {
                     final isSelected = tempSelected.contains(emotion);
                     return CheckboxListTile(
-                      title: Text(emotion),
+                      title: Text(emotion, style: TextStyle(color: isDark ? Colors.white : Colors.black)),
                       value: isSelected,
+                      activeColor: isDark ? AppColors.accentPurple : AppColors.hotPink,
+                      checkColor: Colors.white,
+                      controlAffinity: ListTileControlAffinity.trailing,
                       onChanged: (checked) {
                         // Use dialog-local setState so UI updates immediately inside the dialog
                         setStateDialog(() {
@@ -111,10 +117,17 @@ class _MoodTrackerPageState extends State<MoodTrackerPage> {
               ),
               actions: [
                 TextButton(
+                  style: TextButton.styleFrom(
+                    foregroundColor: isDark ? Colors.white70 : null,
+                  ),
                   onPressed: () => Navigator.pop(context, null),
                   child: const Text('Cancel'),
                 ),
                 ElevatedButton(
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: isDark ? AppColors.accentPurple : AppColors.hotPink,
+                    foregroundColor: Colors.white,
+                  ),
                   onPressed: () => Navigator.pop(context, tempSelected),
                   child: const Text('Save'),
                 ),
@@ -308,17 +321,19 @@ class _MoodTrackerPageState extends State<MoodTrackerPage> {
             child: ListView(
               children: _checkedActivities.entries.map((entry) {
                 return CheckboxListTile(
-                  title: Text(
-                    entry.key,
-                    style: TextStyle(
-                      color: themeProvider.isDarkMode ? Colors.white : Colors.black87,
+                    title: Text(
+                      entry.key,
+                      style: TextStyle(
+                        color: themeProvider.isDarkMode ? Colors.white : Colors.black87,
+                      ),
                     ),
-                  ),
-                  value: entry.value,
-                  onChanged: (bool? val) {
-                    setState(() {
-                      _checkedActivities[entry.key] = val ?? false;
-                    });
+                    value: entry.value,
+                    activeColor: themeProvider.isDarkMode ? AppColors.accentPurple : AppColors.hotPink,
+                    checkColor: Colors.white,
+                    onChanged: (bool? val) {
+                      setState(() {
+                        _checkedActivities[entry.key] = val ?? false;
+                      });
                     //Go to relevant page
                     if (val == true) {
                       switch (entry.key) {
