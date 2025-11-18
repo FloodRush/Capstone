@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:project/pages/journal_page.dart';
+import 'package:project/pages/meditation_page.dart';
+import 'package:project/pages/motivation_page.dart';
+import 'package:project/pages/my_goal_page.dart';
 import 'package:project/theme.dart';
 import 'package:project/providers/theme_provider.dart';
 import 'package:provider/provider.dart';
@@ -315,6 +319,34 @@ class _MoodTrackerPageState extends State<MoodTrackerPage> {
                     setState(() {
                       _checkedActivities[entry.key] = val ?? false;
                     });
+                    //Go to relevant page
+                    if (val == true) {
+                      switch (entry.key) {
+                        case 'Journal':
+                          Navigator.of(context).push(
+                            MaterialPageRoute(builder: (_) => const JournalPage()),
+                          );
+                          break;
+
+                        case 'Meditate':
+                          Navigator.of(context).push(
+                            MaterialPageRoute(builder: (_) => const MeditationPage()),
+                          );
+                          break;
+
+                        case 'Get Inspired':
+                          Navigator.of(context).push(
+                            MaterialPageRoute(builder: (_) => const MotivationPage()),
+                          );
+                          break;
+
+                        case 'Check Your Goals':
+                          Navigator.of(context).push(
+                            MaterialPageRoute(builder: (_) => const MyGoalPage()),
+                          );
+                          break;
+                      }
+                    }
                   },
                 );
               }).toList(),
